@@ -1,0 +1,45 @@
+{
+  "data": [
+    {
+      "id": 17,
+      "name": null,
+      "description": null,
+      "ranfrom": "ui",
+      "status": "Complete",
+      "profilingEnabled": true,
+      "flowRunId": null,
+      "createdAt": "2018-06-19T09:25:46.865Z",
+      "updatedAt": "2018-06-19T09:25:49.262Z",
+      "createdBy": 4,
+      "updatedBy": 4,
+      "wrangledDataset": {
+        "id": 80,
+        "wrangled": true,
+        "referenceName": null,
+        "referenceDescription": null,
+        "createdAt": "2018-06-19T09:24:49.873Z",
+        "updatedAt": "2018-06-19T09:24:49.912Z",
+        "createdBy": 4,
+        "updatedBy": 4,
+        "activeSample": {
+          "id": 51
+        },
+        "flow": {
+          "id": 14,
+          "name": "Crashtest",
+          "description": "aaa",
+          "createdAt": "2018-06-19T09:23:01.023Z",
+          "updatedAt": "2018-06-19T09:23:01.107Z",
+          "createdBy": 4,
+          "updatedBy": 4
+        },
+        "script": {
+          "id": 77
+        }
+      },
+      "snapshot": {
+        "id": 39
+      }
+    }
+  ]
+}

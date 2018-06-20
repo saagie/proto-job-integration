@@ -1,0 +1,21 @@
+dataiku:
+  url: http://${DATAIKU_IP}:${DATAIKU_PORT}/public/api
+  apikey: ${DATAIKU_KEY}
+  project: ${DATAIKU_PROJECT}
+
+trifacta:
+  url: ${POC_TRIFACTA_URL}/v3
+  username: ${POC_TRIFACTA_USERNAME}
+  password: ${POC_TRIFACTA_PASSWORD}
+
+common:
+  job: ${POC_COMMON_JOB}
+
+
+logging:
+  level:
+    root: WARN
+
+spring:
+  profiles:
+    active: dataiku, starter
