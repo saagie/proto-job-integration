@@ -1,7 +1,6 @@
 dataiku:
   url: http://${DATAIKU_IP}:${DATAIKU_PORT}/public/api
   apikey: ${DATAIKU_KEY}
-  project: ${DATAIKU_PROJECT}
 
 trifacta:
   url: ${POC_TRIFACTA_URL}/v3
@@ -9,6 +8,7 @@ trifacta:
   password: ${POC_TRIFACTA_PASSWORD}
 
 common:
+  project: ${POC_COMMON_PROJECT}
   job: ${POC_COMMON_JOB}
 
 
@@ -18,4 +18,4 @@ logging:
 
 spring:
   profiles:
-    active: dataiku, starter
+    active: dataiku, demo

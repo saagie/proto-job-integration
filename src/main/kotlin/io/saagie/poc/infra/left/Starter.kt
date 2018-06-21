@@ -1,5 +1,6 @@
 package io.saagie.poc.infra.left
 
+import io.saagie.poc.domain.EnvironmentManager
 import io.saagie.poc.domain.JobManager
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.CommandLineRunner
@@ -8,16 +9,24 @@ import org.springframework.stereotype.Component
 
 @Component
 @Profile("starter")
-class Starter(private val jobManager: JobManager) : CommandLineRunner {
+class Starter(private val envManager: EnvironmentManager) : CommandLineRunner {
+    @Value("\${common.project}")
+    lateinit var project: String
+
     @Value("\${common.job}")
     lateinit var jobId: String
 
     override fun run(vararg args: String?) {
-        // Retireving global intel.
-        println("-- Jobs list --")
-        val jobs = jobManager.getAll()
-        jobs.forEach(::println)
-        println("---------------")
+        // Getting projects display
+        display("Projects", envManager.getProjects().toList())
+        val jobManager = envManager.getJobManager(project)
+
+        // Getting datasets
+        display("Datasets", jobManager.getDatasets().toList())
+
+        // Retrieving global intel.
+        val jobs = jobManager.getAll().toList()
+        display("Jobs", jobs)
 
         // Retrieving job infos.
         val job = jobs.firstOrNull { it.id == jobId }
@@ -31,6 +40,12 @@ class Starter(private val jobManager: JobManager) : CommandLineRunner {
         // Job's current status
         val status = jobManager.getStatus(job)
         println("> Status : ${status.name}")
+        println("---------------")
+    }
+
+    private fun <T> display(label: String, list: List<T>) {
+        println("-- $label list --")
+        list.forEach(::println)
         println("---------------")
     }
 }
