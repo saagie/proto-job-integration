@@ -65,19 +65,19 @@ class TrifactaJobManager(private val env:TrifactaEnvironmentManager) : JobManage
 
 
     // TOOLS
-    fun toDataset(dto: DatasetDTO) = Dataset(
+    private fun toDataset(dto: DatasetDTO) = Dataset(
             id = dto.id,
             name = dto.name,
             project = TrifactaEnvironmentManager.companion.DEFAULT_PROJECT_NAME
     )
 
-    fun toStatus(status: String) = when(status.toUpperCase().trim()) {
+    private fun toStatus(status: String) = when(status.toUpperCase().trim()) {
         "PENDING" -> JobStatus.NOT_STARTED
         "COMPLETE" -> JobStatus.DONE
         else -> JobStatus.from(status)
     }
 
-    fun toJob(dto: JobDTO) = Job(
+    private fun toJob(dto: JobDTO) = Job(
             id = dto.id,
             datasetId = dto.wrangledDataset.id.toString(),
             status = toStatus(dto.status)

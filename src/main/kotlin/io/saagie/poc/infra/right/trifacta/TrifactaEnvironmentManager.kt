@@ -34,5 +34,5 @@ class TrifactaEnvironmentManager(val restTemplate: RestTemplate) : EnvironmentMa
 
 
     // TOOLS
-    fun generateAuthKey() = generateBasicAuthKey(username, password)
+    internal fun generateAuthKey() = generateBasicAuthKey(username, password)
 }

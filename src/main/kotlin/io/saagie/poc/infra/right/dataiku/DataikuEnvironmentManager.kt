@@ -39,7 +39,7 @@ class DataikuEnvironmentManager(val restTemplate: RestTemplate) : EnvironmentMan
     /**
      * Dataiku is using basic auth, with a simple apikey as username and no password.
      */
-    fun generateAuthKey() = generateBasicAuthKey(apikey)
+    internal fun generateAuthKey() = generateBasicAuthKey(apikey)
 
 
     // DTOs

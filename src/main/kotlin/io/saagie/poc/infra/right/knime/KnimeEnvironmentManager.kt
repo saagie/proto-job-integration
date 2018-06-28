@@ -46,7 +46,7 @@ class KnimeEnvironmentManager(val restTemplate: RestTemplate) : EnvironmentManag
     /**
      * Knime is using basic auth.
      */
-    fun generateAuthKey() = generateBasicAuthKey(username, password)
+    internal fun generateAuthKey() = generateBasicAuthKey(username, password)
 
 
     // DTOs

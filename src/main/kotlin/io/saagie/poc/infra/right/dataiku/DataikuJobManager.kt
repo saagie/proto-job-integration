@@ -65,13 +65,13 @@ class DataikuJobManager(private val env: DataikuEnvironmentManager, private val 
 
 
     // TOOLS
-    fun toDataset(dto: DatasetDTO) = Dataset(
+    private fun toDataset(dto: DatasetDTO) = Dataset(
             id = dto.name,
             name = dto.smartName,
             project = dto.projectKey
     )
 
-    fun toJob(dto: JobDTO) = Job(
+    private fun toJob(dto: JobDTO) = Job(
             id = dto.def.id,
             datasetId = dto.def.name.split(" ")[1],
             status = JobStatus.from(dto.state)
