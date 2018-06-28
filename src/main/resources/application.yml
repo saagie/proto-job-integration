@@ -1,21 +1,25 @@
 dataiku:
-  url: http://${DATAIKU_IP}:${DATAIKU_PORT}/public/api
-  apikey: ${DATAIKU_KEY}
+  url: http://${DATAIKU_ADAPTER_IP}:${DATAIKU_ADAPTER_PORT}/public/api
+  apikey: ${DATAIKU_ADAPTER_KEY}
+
+knime:
+  url: ${KNIME_ADAPTER_URL}/rest/v4
+  username: ${KNIME_ADAPTER_USERNAME}
+  password: ${KNIME_ADAPTER_PASSWORD}
 
 trifacta:
-  url: ${POC_TRIFACTA_URL}/v3
-  username: ${POC_TRIFACTA_USERNAME}
-  password: ${POC_TRIFACTA_PASSWORD}
+  url: ${TRIFACTA_ADAPTER_URL}/v3
+  username: ${TRIFACTA_ADAPTER_USERNAME}
+  password: ${TRIFACTA_ADAPTER_PASSWORD}
 
 common:
-  project: ${POC_COMMON_PROJECT}
-  job: ${POC_COMMON_JOB}
-
-
-logging:
-  level:
-    root: WARN
+  project: ${PREDEFINED_PROJECT}
+  job: ${PREDEFINED_JOB}
 
 spring:
   profiles:
-    active: dataiku, demo
+    active: knime,demo
+
+server:
+  port: 8081
+
