@@ -1,8 +1,12 @@
 # POC - Job management
-This POC consists on a simple library based on Dataiku's REST API and Trifacta's, which will provide elementary functionalities to handle your jobs management.
-
+This POC consists on a simple library which will provide elementary functionalities to handle your jobs management.
+This management is made by delegation, using one of our partner's software :
+- Knime
+- Trifacta
+- Dataiku
 
 ## Content
+### Modules
 This little project can be splitted into three parts :
 1) *The business logic* (`domain`) : Defines all informations required to define what a job is (`Job` = name, project, id, status), and
 how we can manage it (`JobManager`).
@@ -11,11 +15,45 @@ how we can manage it (`JobManager`).
 
 3) *The demo apps* (`infra.left`) : Simple apps to manipulate all available commands.
 
+### Concepts
+
+- **Jobs** : A Job is a specific action which will produces an output result on a given data input.
+- **Dataset** : A dataset is used to store a specified quantity of data. A dataset is usually created from an import process,
+or as the result of a given jobs's execution. *(In some apps, jobs are related to datasets as their source.)*
+- **Project** : A project is a group of datasets and jobs, and describes how they're related on to another, in order to produce
+the solution to given problem.
+
+### Compatibility
+#### Concepts
+Describes the matching between a given app's concepts and ours.
+
+|**Concept**|**Dataiku**|**Trifacta**|**Knime**
+|:-:|:-:|:-:|:-: 
+|Project|Project| ---| Workflow
+|Dataset|Dataset|WrangledDataset|---
+|Job|Job|JobGroup|Job
+
+#### Methods
+Describes which methods are currently available for each app.
+
+|**Functionnality**|**Dataiku**|**Trifacta**|**Knime**
+|:-|:-:|:-:|:-: 
+|Retrieve all projects | OK | --| OK 
+|Retrieve all datasets for a given project | OK | OK | --
+|Retrieve all jobs for a given project | OK | OK | OK 
+| Retrieve a job with a specific ID | OK | OK | OK
+| Retrieve a job's current status | OK | OK | OK
+|Start a specific job| OK | OK | OK
+|Stop a given job| OK| -- | --
+
 
 ## Demonstration tools
-By using a correct spring profile, you can select which demonstration tool to use, for a rapid test of these functionalities :
+By using a correct spring profile, you can select which demonstration tool to use, for a rapid test of the functionalities :
 - `demo` : Consists of an interactive demo which commands are described below.
 - `starter` : An automatic execution of all library's methods, with a simple display of the results.
+Note that it will require two additionnal parameters as environment variable (`PREDEFINED_PROJECT` and `PREDIFINED_JOB`) to function.
+
+And to select your app, you can add (only one of them) : `dataiku`, `trifacta` or `knime`.
 
 To modify the profile at launch, you should use a command like :
 `java -Dspring.profiles.active=dataiku,demo -jar {YOUR_JAR}` 
@@ -41,39 +79,18 @@ It includes the following commands :
 - `start $ID` : Starts the specified job.
 - `stop $ID` : Stops the given job if currently running. Useless if the job's already done.
 
+## Dev' setup
+1) In **IntelliJ**, open `Run` > `Edit configurations`
 
-## Dev's Getting started
-To select which platform you'd like to choose, you only need to update the `spring.profile.active` parameter
-stored in the `/src/main/resources/application.yml`configuration file.
-Currently, the available managers are `dataiku` and `trifacta`. Their configuration relies on environment variables, which
-you'll need to alter to your own needs.
+2) Add a new Spring Boot configuration (+), and specify the main class of the app `io.saagie.poc.infra.AppKt`
 
-### Dataiku (`dataiku`)
-#### Ready-to-go setup
-Currently, the app is pre-defined to work on A5 dev platform, by using my trial's API key.
-You can directly use the `.jar`, if you already have an access to this service.
-A few jobs have been defined to be used during the demo (Project name : `FIRSTTRY`)
+3) *(Optional, if specified at launch)* Change the current app's action by changing the `Active profiles` attribute.
 
-#### Custom setup
-1) Setup your Dataiku DSS's informations on configuration file `/src/main/resources/application.yml`. 
-You'll only have to change the `host` and the `port` properties.
+4) Update your environment varaibles as needed by your app in the `Override parameters` menu. 
+*Most of the time,you'll only need to change the service's URL and define your credentials 
+(Please check the `src/main/resources/application.yml` for the exact syntax).*
 
-2) Retrieve your API token from Dataiku ([see Documentation above](https://doc.dataiku.com/dss/latest/publicapi/keys.html))
-and change the `apikey` parameter in the `/src/main/resources/application.yml` file.
+5) Run it through your IDE
 
-3) Select which Dataiku project and job to manipulate (in the starter) by changing the `project` and `job` parameters 
-in the `common` part of the same configuration file.
-
-4) Open a terminal at the project root, enter `mvn package`, and run the produced `.jar` file from
-the freshly created `target` directory.
-
-### Trifacta (`trifacta`)
-#### Ready-to-go setup
-Currently, the app is deployed on Saagie's demo platform under the name `Poc - Trifacta`.
-You can simply run it and read the incoming logs to show some results.
-
-#### Custom setup
-1) Setup your Trifacta's informations on configuration file `/src/main/resources/application.yml`. 
-You'll only have to change the base URL, the username and password.
-
-2) Select which job to manipulate by changing the `project` parameter in the `common` section of the same configuration file.
+You can also update your `application.yml` and directly build the app by using `mvn clean package`. 
+You'll be able to launch the app directly by using the produced jar file.
