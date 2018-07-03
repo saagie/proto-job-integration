@@ -12,6 +12,11 @@ trifacta:
   username: ${TRIFACTA_ADAPTER_USERNAME}
   password: ${TRIFACTA_ADAPTER_PASSWORD}
 
+dsx:
+  url: ${DSX_ADAPTER_URL}
+  username: ${DSX_ADAPTER_USERNAME}
+  password: ${DSX_ADAPTER_PASSWORD}
+
 common:
   project: ${PREDEFINED_PROJECT}
   job: ${PREDEFINED_JOB}
