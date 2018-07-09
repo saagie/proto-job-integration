@@ -87,7 +87,7 @@ class TrifactaJobManager(private val env:TrifactaEnvironmentManager) : JobManage
 
     private fun toJob(dto: JobDTO) = Job(
             id = dto.id,
-            datasetId = dto.wrangledDataset.id.toString(),
+            target = dto.wrangledDataset.id.toString(),
             status = toStatus(dto.status)
     )
 

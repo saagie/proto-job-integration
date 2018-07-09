@@ -1,5 +1,6 @@
 package io.saagie.poc.infra.right.knime
 
+import com.google.gson.Gson
 import io.saagie.poc.domain.Dataset
 import io.saagie.poc.domain.Job
 import io.saagie.poc.domain.JobManager
@@ -52,13 +53,22 @@ class KnimeJobManager(private val env: KnimeEnvironmentManager, private val proj
     // Knime doesn't include a specific 'stop a Job' API request.
     override fun stop(job: Job) = throw UnsupportedOperationException()
 
-    override fun import(jobDescription: String, config: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun import(jobDescription: String, target: String) = env.restTemplate.process(
+            request = RequestEntity.post(URI("${env.url}/repository$target:jobs"))
+                    .header("Authorization", "Basic ${env.generateAuthKey()}")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(jobDescription)
+    )
 
-    override fun export(job: Job): String {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    @Suppress("UNCHECKED_CAST")
+    override fun export(job: Job) = env.restTemplate.process(
+            request = RequestEntity.get(URI("${env.url}/jobs/${job.id}/"))
+                    .header("Authorization", "Basic ${env.generateAuthKey()}")
+                    .build() as RequestEntity<Any>,
+
+            verify = { it != null },
+            transform = { Gson().toJson(it!!)!! }
+    )
 
 
     // TOOLS
@@ -72,6 +82,7 @@ class KnimeJobManager(private val env: KnimeEnvironmentManager, private val proj
 
     private fun toJob(dto: JobDTO) = Job(
             id = dto.id,
+            target = dto.workflow,
             status = toStatus(dto.state)
     )
 

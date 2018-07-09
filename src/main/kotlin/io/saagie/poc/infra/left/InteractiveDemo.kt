@@ -18,6 +18,7 @@ class InteractiveDemo(private val envManager: EnvironmentManager) : CommandLineR
         }
 
         var jobs = listOf<Job>()
+        var lastImport = ""
         lateinit var jobManager: JobManager
         println("\nThe DSS demonstration tool is now operational !!")
         do {
@@ -53,6 +54,16 @@ class InteractiveDemo(private val envManager: EnvironmentManager) : CommandLineR
                         val i = params[1].toInt()
                         jobManager.stop(jobs[i - 1])
                         println("The job has been stopped !")
+                    }
+                    "import" -> {
+                        val target = params[1]
+                        jobManager.import(lastImport, target)
+                        println("The job has been imported to $target !")
+                    }
+                    "export" -> {
+                        val i = params[1].toInt()
+                        lastImport = jobManager.export(jobs[i - 1])
+                        println("The job has been exported ! Resulting JSON :\n$lastImport")
                     }
                 }
             } catch (exc : Exception) {

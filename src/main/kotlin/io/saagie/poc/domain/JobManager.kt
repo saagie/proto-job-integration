@@ -11,11 +11,11 @@ interface JobManager {
 
     fun start(target: String)
 
-    fun start(job: Job) = start(job.datasetId)
+    fun start(job: Job) = start(job.target)
 
     fun stop(job: Job)
 
-    fun import(jobDescription: String, config: String)
+    fun import(jobDescription: String, target: String)
 
     fun export(job: Job): String
 }
