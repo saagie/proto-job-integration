@@ -14,4 +14,8 @@ interface JobManager {
     fun start(job: Job) = start(job.datasetId)
 
     fun stop(job: Job)
+
+    fun import(jobDescription: String, config: String)
+
+    fun export(job: Job): String
 }

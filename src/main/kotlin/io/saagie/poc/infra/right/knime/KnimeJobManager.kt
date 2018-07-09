@@ -52,6 +52,14 @@ class KnimeJobManager(private val env: KnimeEnvironmentManager, private val proj
     // Knime doesn't include a specific 'stop a Job' API request.
     override fun stop(job: Job) = throw UnsupportedOperationException()
 
+    override fun import(jobDescription: String, config: String) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun export(job: Job): String {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
 
     // TOOLS
     private fun inProject(dto: JobDTO) = dto.workflow.startsWith(project)

@@ -48,6 +48,14 @@ class DSXJobManager(private val env: DSXEnvironmentManager, private val project:
                     .build()
     )
 
+    override fun import(jobDescription: String, config: String) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun export(job: Job): String {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
 
     // TOOLS
     private fun toJob(id: String) = Job(id)

@@ -63,6 +63,14 @@ class DataikuJobManager(private val env: DataikuEnvironmentManager, private val 
                     .build()
     )
 
+    override fun import(jobDescription: String, config: String) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun export(job: Job): String {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
 
     // TOOLS
     private fun toDataset(dto: DatasetDTO) = Dataset(

@@ -1,5 +1,5 @@
 dataiku:
-  url: http://${DATAIKU_ADAPTER_IP}:${DATAIKU_ADAPTER_PORT}/public/api
+  url: ${DATAIKU_ADAPTER_URL}/public/api
   apikey: ${DATAIKU_ADAPTER_KEY}
 
 knime:

@@ -63,6 +63,14 @@ class TrifactaJobManager(private val env:TrifactaEnvironmentManager) : JobManage
             throw UnsupportedOperationException()
     }
 
+    override fun import(jobDescription: String, config: String) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun export(job: Job): String {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
 
     // TOOLS
     private fun toDataset(dto: DatasetDTO) = Dataset(
