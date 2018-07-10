@@ -15,7 +15,7 @@ interface JobManager {
 
     fun stop(job: Job)
 
-    fun import(jobDescription: String, target: String)
+    fun import(jobDescription: String, target: String = "")
 
     fun export(job: Job): String
 }

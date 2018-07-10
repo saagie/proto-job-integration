@@ -1,5 +1,6 @@
 package io.saagie.poc.infra.right.trifacta
 
+import com.google.gson.Gson
 import io.saagie.poc.domain.Dataset
 import io.saagie.poc.domain.Job
 import io.saagie.poc.domain.JobManager
@@ -11,6 +12,8 @@ import java.net.URI
 
 
 class TrifactaJobManager(private val env:TrifactaEnvironmentManager) : JobManager {
+
+
     // METHODS
     @Suppress("UNCHECKED_CAST")
     override fun getDatasets() = env.restTemplate.process(
@@ -63,13 +66,24 @@ class TrifactaJobManager(private val env:TrifactaEnvironmentManager) : JobManage
             throw UnsupportedOperationException()
     }
 
-    override fun import(jobDescription: String, config: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun import(jobDescription: String, target: String) = env.restTemplate.process(
+            request = RequestEntity.post(URI("${env.url}/wrangledDataset/"))
+                    .header("Authorization", "Basic ${env.generateAuthKey()}")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(
+                            jobDescription
+                    )
+    )
 
-    override fun export(job: Job): String {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    @Suppress("UNCHECKED_CAST")
+    override fun export(job: Job) = env.restTemplate.process(
+        request = RequestEntity.get(URI("${env.url}/wrangledDatasets/${job.id}"))
+                .header("Authorization", "Basic ${env.generateAuthKey()}")
+                .build() as RequestEntity<Any>,
+
+        verify = { it != null },
+        transform = { Gson().toJson(it!!) }
+    )
 
 
     // TOOLS
