@@ -6,6 +6,7 @@ import io.saagie.poc.domain.Job
 import io.saagie.poc.domain.JobManager
 import io.saagie.poc.domain.JobStatus
 import io.saagie.poc.infra.right.common.process
+import io.saagie.poc.infra.right.common.toProperURL
 import org.springframework.http.MediaType
 import org.springframework.http.RequestEntity
 import java.net.URI
@@ -42,7 +43,7 @@ class KnimeJobManager(private val env: KnimeEnvironmentManager, private val proj
     override fun getStatus(job: Job) = get(job.id).status
 
     override fun start(target: String) = env.restTemplate.process(
-            request = RequestEntity.post(URI("${env.url}/jobs/$target/"))
+            request = RequestEntity.post(URI("${env.url}/jobs/$target/".toProperURL()))
                     .header("Authorization", "Basic ${env.generateAuthKey()}")
                     .contentType(MediaType.APPLICATION_JSON)
                     .body("{}")
@@ -54,7 +55,7 @@ class KnimeJobManager(private val env: KnimeEnvironmentManager, private val proj
     override fun stop(job: Job) = throw UnsupportedOperationException()
 
     override fun import(jobDescription: String, target: String) = env.restTemplate.process(
-            request = RequestEntity.post(URI("${env.url}/repository$target:jobs"))
+            request = RequestEntity.post(URI("${env.url}/repository$target:jobs".toProperURL()))
                     .header("Authorization", "Basic ${env.generateAuthKey()}")
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(jobDescription)
@@ -64,10 +65,10 @@ class KnimeJobManager(private val env: KnimeEnvironmentManager, private val proj
     override fun export(job: Job) = env.restTemplate.process(
             request = RequestEntity.get(URI("${env.url}/jobs/${job.id}/"))
                     .header("Authorization", "Basic ${env.generateAuthKey()}")
-                    .build() as RequestEntity<Any>,
+                    .build() as RequestEntity<String>,
 
-            verify = { it != null },
-            transform = { Gson().toJson(it!!)!! }
+            verify = { !(it?.isBlank() ?: true) },
+            transform = { it!! }
     )
 
 
