@@ -24,7 +24,7 @@ class DataikuEnvironmentManager(val restTemplate: RestTemplate) : EnvironmentMan
     // METHODS
     @Suppress("UNCHECKED_CAST")
     override fun getProjects() = restTemplate.process(
-            request = RequestEntity.get(URI("${url}/projects/"))
+            request = RequestEntity.get(URI("$url/projects/"))
             .header("Authorization", "Basic ${generateAuthKey()}")
             .build() as RequestEntity<Array<ProjectDTO>>,
 
@@ -33,6 +33,18 @@ class DataikuEnvironmentManager(val restTemplate: RestTemplate) : EnvironmentMan
     )
 
     override fun getJobManager(project: String?) = DataikuJobManager(this, project!!)
+
+    override fun importProject(description: String, target: String) = throw UnsupportedOperationException()
+
+    @Suppress("UNCHECKED_CAST")
+    override fun exportProject(id: String) = restTemplate.process(
+            request = RequestEntity.get(URI("$url/projects/$id/export"))
+                    .header("Authorization", "Basic ${generateAuthKey()}")
+                    .build() as RequestEntity<String>,
+
+            verify = { !(it?.isBlank() ?: true) },
+            transform = { it!! }
+    )
 
 
     // TOOLS

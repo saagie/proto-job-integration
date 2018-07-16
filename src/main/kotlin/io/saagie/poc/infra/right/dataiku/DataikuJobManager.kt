@@ -7,6 +7,7 @@ import io.saagie.poc.domain.JobStatus
 import io.saagie.poc.infra.right.common.process
 import org.springframework.http.MediaType
 import org.springframework.http.RequestEntity
+import org.springframework.http.ResponseEntity
 import java.net.URI
 
 
@@ -63,13 +64,22 @@ class DataikuJobManager(private val env: DataikuEnvironmentManager, private val 
                     .build()
     )
 
-    override fun import(jobDescription: String, config: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun import(jobDescription: String, target: String) = env.restTemplate.process(
+            request = RequestEntity.post(URI("${env.url}/projects/$project/datasets/$target"))
+                    .header("Authorization", "Basic ${env.generateAuthKey()}")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(jobDescription)
+    )
 
-    override fun export(job: Job): String {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    @Suppress("UNCHECKED_CAST")
+    override fun export(job: Job) = env.restTemplate.process(
+            request = RequestEntity.get(URI("${env.url}/projects/$project/datasets/${job.target}"))
+                    .header("Authorization", "Basic ${env.generateAuthKey()}")
+                    .build() as RequestEntity<String>,
+
+            verify = { !(it?.isBlank() ?: true) },
+            transform = { it!! }
+    )
 
 
     // TOOLS

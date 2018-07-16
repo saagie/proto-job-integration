@@ -12,8 +12,6 @@ import java.net.URI
 
 
 class TrifactaJobManager(private val env:TrifactaEnvironmentManager) : JobManager {
-
-
     // METHODS
     @Suppress("UNCHECKED_CAST")
     override fun getDatasets() = env.restTemplate.process(
@@ -67,7 +65,7 @@ class TrifactaJobManager(private val env:TrifactaEnvironmentManager) : JobManage
     }
 
     override fun import(jobDescription: String, target: String) = env.restTemplate.process(
-            request = RequestEntity.post(URI("${env.url}/wrangledDataset/"))
+            request = RequestEntity.post(URI("${env.url}/wrangledDatasets/"))
                     .header("Authorization", "Basic ${env.generateAuthKey()}")
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(
@@ -101,7 +99,7 @@ class TrifactaJobManager(private val env:TrifactaEnvironmentManager) : JobManage
 
     private fun toJob(dto: JobDTO) = Job(
             id = dto.id,
-            target = dto.wrangledDataset.id.toString(),
+            target = dto.wrangledDataset?.id.toString(),
             status = toStatus(dto.status)
     )
 
@@ -117,7 +115,7 @@ class TrifactaJobManager(private val env:TrifactaEnvironmentManager) : JobManage
     data class JobDTO(
             val id: String = "",
             val status: String = "",
-            val wrangledDataset: IDDTO = IDDTO()
+            val wrangledDataset: IDDTO? = IDDTO()
     )
     data class JobsDTO(
             val data: Array<JobDTO> = arrayOf()

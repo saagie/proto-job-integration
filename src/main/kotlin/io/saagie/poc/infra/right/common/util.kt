@@ -44,3 +44,9 @@ inline fun <reified T, R> RestTemplate.process(
  */
 inline fun <reified T> RestTemplate.process(request: RequestEntity<T>, verify: (T?) -> Boolean = { true })
         = this.process(request, {}, verify)
+
+
+/**
+ * Transforms a sentence into an URK-ready String.
+ */
+fun String.toProperURL() = this.replace(" ", "%20")

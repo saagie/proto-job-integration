@@ -38,6 +38,10 @@ class DSXEnvironmentManager(val restTemplate: RestTemplate) : EnvironmentManager
 
     override fun getJobManager(project: String?) = DSXJobManager(this, project!!)
 
+    override fun importProject(description: String, target: String) = throw UnsupportedOperationException()
+
+    override fun exportProject(id: String) = throw UnsupportedOperationException()
+
 
     // TOOLS
     @Suppress("UNCHECKED_CAST")

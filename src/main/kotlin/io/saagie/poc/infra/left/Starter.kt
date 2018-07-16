@@ -43,11 +43,11 @@ class Starter(private val envManager: EnvironmentManager) : CommandLineRunner {
         val status = jobManager.getStatus(job)
         display("Status : ${status.name}")
 
-        // Job's export
+        // Job's exportProject
         val json = jobManager.export(job)
         display("The job has been exported :\n$json")
 
-        // Job's import
+        // Job's importProject
         jobManager.import(json)
         display("The job has been imported !")
     }

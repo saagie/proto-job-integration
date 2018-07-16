@@ -23,7 +23,7 @@ common:
 
 spring:
   profiles:
-    active: knime,demo
+    active: trifacta,starter
 
 server:
   port: 8081

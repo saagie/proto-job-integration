@@ -32,6 +32,9 @@ class TrifactaEnvironmentManager(val restTemplate: RestTemplate) : EnvironmentMa
 
     override fun getJobManager(project: String?) = TrifactaJobManager(this)
 
+    override fun importProject(description: String, target: String) = throw UnsupportedOperationException()
+
+    override fun exportProject(id: String)= throw UnsupportedOperationException()
 
     // TOOLS
     internal fun generateAuthKey() = generateBasicAuthKey(username, password)

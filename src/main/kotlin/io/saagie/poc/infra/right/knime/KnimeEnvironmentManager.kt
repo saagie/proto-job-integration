@@ -64,6 +64,10 @@ class KnimeEnvironmentManager(val restTemplate: RestTemplate) : EnvironmentManag
 
     override fun getJobManager(project: String?) = KnimeJobManager(this, project!!)
 
+    override fun importProject(description: String, target: String) = throw UnsupportedOperationException()
+
+    override fun exportProject(id: String)= throw UnsupportedOperationException()
+
 
     // TOOLS
     /**
