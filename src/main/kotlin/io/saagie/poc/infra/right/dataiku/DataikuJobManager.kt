@@ -5,33 +5,27 @@ import io.saagie.poc.domain.Job
 import io.saagie.poc.domain.JobManager
 import io.saagie.poc.domain.JobStatus
 import io.saagie.poc.infra.right.common.process
-import org.springframework.http.MediaType
-import org.springframework.http.RequestEntity
-import org.springframework.http.ResponseEntity
-import java.net.URI
 
 
 class DataikuJobManager(private val env: DataikuEnvironmentManager, private val project: String) : JobManager {
     // COMMANDS
     @Suppress("UNCHECKED_CAST")
     override fun getDatasets() = env.restTemplate.process(
-        request = RequestEntity.get(URI("${env.url}/projects/$project/datasets/"))
-                .header("Authorization", "Basic ${env.generateAuthKey()}")
-                .build() as RequestEntity<Array<DatasetDTO>>,
-
-        verify = {
-            !(it?.isEmpty() ?: true)
-            && !(it?.any { it.projectKey != project} ?: true)
-        },
-        transform = { it!!.map(::toDataset) }
+            request = env.requester.get<Array<DatasetDTO>>(
+                    url = "${env.url}/projects/$project/datasets/"
+            ),
+            verify = {
+                !(it?.isEmpty() ?: true)
+                && !(it?.any { it.projectKey != project} ?: true)
+            },
+            transform = { it!!.map(::toDataset) }
     )
 
     @Suppress("UNCHECKED_CAST")
     override fun getAll() = env.restTemplate.process(
-            request = RequestEntity.get(URI("${env.url}/projects/$project/jobs/"))
-                    .header("Authorization", "Basic ${env.generateAuthKey()}")
-                    .build() as RequestEntity<Array<JobDTO>>,
-
+            request = env.requester.get<Array<JobDTO>>(
+                    url = "${env.url}/projects/$project/jobs/"
+            ),
             verify = {
                 !(it?.isEmpty() ?: true)
                 && !(it?.any { it.def.projectKey != project } ?: true)
@@ -41,42 +35,38 @@ class DataikuJobManager(private val env: DataikuEnvironmentManager, private val 
 
     @Suppress("UNCHECKED_CAST")
     override fun getStatus(job: Job) = env.restTemplate.process(
-            request = RequestEntity.get(URI("${env.url}/projects/$project/jobs/${job.id}/"))
-                    .header("Authorization", "Basic ${env.generateAuthKey()}")
-                    .build() as RequestEntity<StatusDTO>,
-
+            request = env.requester.get<StatusDTO>(
+                    url = "${env.url}/projects/$project/jobs/${job.id}/"
+            ),
             verify = { !(it?.baseStatus?.state?.isBlank() ?: true) },
             transform = { JobStatus.from(it!!.baseStatus.state) }
     )
 
     override fun start(target: String) = env.restTemplate.process(
-            request = RequestEntity.post(URI("${env.url}/projects/$project/jobs/"))
-                    .header("Authorization", "Basic ${env.generateAuthKey()}")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(StartDTO(arrayOf(
-                            OutputDTO(projectKey = project, id = target)
-                    )))
+            request = env.requester.post(
+                    url = "${env.url}/projects/$project/jobs/",
+                    body = StartDTO(arrayOf(OutputDTO(project, target)))
+            )
     )
 
     override fun stop(job: Job) = env.restTemplate.process(
-            request = RequestEntity.post(URI("${env.url}/projects/$project/jobs/${job.id}/abort/"))
-                    .header("Authorization", "Basic ${env.generateAuthKey()}")
-                    .build()
+            request = env.requester.post(
+                    url = "${env.url}/projects/$project/jobs/${job.id}/abort/"
+            )
     )
 
     override fun import(jobDescription: String, target: String) = env.restTemplate.process(
-            request = RequestEntity.post(URI("${env.url}/projects/$project/datasets/$target"))
-                    .header("Authorization", "Basic ${env.generateAuthKey()}")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(jobDescription)
+            request = env.requester.post(
+                    url = "${env.url}/projects/$project/datasets/$target",
+                    body = jobDescription
+            )
     )
 
     @Suppress("UNCHECKED_CAST")
     override fun export(job: Job) = env.restTemplate.process(
-            request = RequestEntity.get(URI("${env.url}/projects/$project/datasets/${job.target}"))
-                    .header("Authorization", "Basic ${env.generateAuthKey()}")
-                    .build() as RequestEntity<String>,
-
+            request = env.requester.get<String>(
+                    url = "${env.url}/projects/$project/datasets/${job.target}"
+            ),
             verify = { !(it?.isBlank() ?: true) },
             transform = { it!! }
     )

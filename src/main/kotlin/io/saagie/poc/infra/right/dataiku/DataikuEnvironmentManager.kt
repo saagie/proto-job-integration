@@ -1,8 +1,10 @@
 package io.saagie.poc.infra.right.dataiku
 
 import io.saagie.poc.domain.EnvironmentManager
+import io.saagie.poc.infra.right.common.Requester
 import io.saagie.poc.infra.right.common.generateBasicAuthKey
 import io.saagie.poc.infra.right.common.process
+import io.saagie.poc.infra.right.common.securer.BasicSecurer
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
 import org.springframework.http.RequestEntity
@@ -20,14 +22,15 @@ class DataikuEnvironmentManager(val restTemplate: RestTemplate) : EnvironmentMan
     @Value("\${dataiku.apikey}")
     lateinit var apikey: String
 
+    /**
+     * Dataiku is using basic auth, with a simple apikey as username and no password.
+     */
+    internal val requester = Requester(BasicSecurer(apikey))
+
 
     // METHODS
-    @Suppress("UNCHECKED_CAST")
     override fun getProjects() = restTemplate.process(
-            request = RequestEntity.get(URI("$url/projects/"))
-            .header("Authorization", "Basic ${generateAuthKey()}")
-            .build() as RequestEntity<Array<ProjectDTO>>,
-
+            request = requester.get<Array<ProjectDTO>>("$url/projects/"),
             verify = { !(it?.isEmpty() ?: true) },
             transform = { it!!.map { it.projectKey }.toList() }
     )
@@ -36,22 +39,11 @@ class DataikuEnvironmentManager(val restTemplate: RestTemplate) : EnvironmentMan
 
     override fun importProject(description: String, target: String) = throw UnsupportedOperationException()
 
-    @Suppress("UNCHECKED_CAST")
     override fun exportProject(id: String) = restTemplate.process(
-            request = RequestEntity.get(URI("$url/projects/$id/export"))
-                    .header("Authorization", "Basic ${generateAuthKey()}")
-                    .build() as RequestEntity<String>,
-
+            request = requester.get<String>("$url/projects/$id/export"),
             verify = { !(it?.isBlank() ?: true) },
             transform = { it!! }
     )
-
-
-    // TOOLS
-    /**
-     * Dataiku is using basic auth, with a simple apikey as username and no password.
-     */
-    internal fun generateAuthKey() = generateBasicAuthKey(apikey)
 
 
     // DTOs
