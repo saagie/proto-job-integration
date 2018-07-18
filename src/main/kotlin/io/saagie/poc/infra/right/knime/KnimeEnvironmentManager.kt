@@ -1,11 +1,11 @@
 package io.saagie.poc.infra.right.knime
 
 import io.saagie.poc.domain.EnvironmentManager
+import io.saagie.poc.infra.AppProperties
 import io.saagie.poc.infra.right.common.Requester
 import io.saagie.poc.infra.right.common.process
 import io.saagie.poc.infra.right.common.securer.BasicSecurer
 import io.saagie.poc.infra.right.common.toProperURL
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
@@ -14,18 +14,13 @@ import org.springframework.web.server.ResponseStatusException
 
 @Component
 @Profile("knime")
-class KnimeEnvironmentManager(val restTemplate: RestTemplate) : EnvironmentManager {
+class KnimeEnvironmentManager(val restTemplate: RestTemplate, private val properties: AppProperties) : EnvironmentManager {
     // ATTRIBUTES
-    @Value("\${knime.url}")
-    lateinit var url: String
+    internal val url = properties.knime.url
+    internal val requester = Requester(
+            BasicSecurer(properties.knime.username, properties.knime.password)
+    )
 
-    @Value("\${knime.username}")
-    lateinit var username: String
-
-    @Value("\${knime.password}")
-    lateinit var password: String
-
-    internal val requester = Requester(BasicSecurer(username, password))
 
     // METHODS
     @Suppress("UNCHECKED_CAST")

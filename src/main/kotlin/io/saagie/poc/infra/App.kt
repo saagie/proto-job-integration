@@ -11,6 +11,9 @@ import org.springframework.web.client.RestTemplate
 class App {
     @Bean
     fun restTemplate() = RestTemplate()
+
+    @Bean
+    fun appProperties() = AppProperties()
 }
 
 fun main(args: Array<String>) {
