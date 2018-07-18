@@ -11,7 +11,7 @@ class Requester(private val securer: Securer = NoSecurer()) {
     @Suppress("UNCHECKED_CAST")
     fun <T> get(
             url: String,
-            headers: Map<String, String> = mapOf()
+            headers: Map<String, List<String>> = mapOf()
     )
             = RequestEntity.get(URI(url)).defineHeaders(headers).build() as RequestEntity<T>
 
@@ -19,7 +19,7 @@ class Requester(private val securer: Securer = NoSecurer()) {
     fun <T> post(
             url: String,
             body: T,
-            headers: Map<String, String> = mapOf(),
+            headers: Map<String, List<String>> = mapOf(),
             mediaType: MediaType = MediaType.APPLICATION_JSON
     )
             = RequestEntity.post(URI(url)).defineHeaders(headers).contentType(mediaType).body(body)
@@ -30,14 +30,18 @@ class Requester(private val securer: Securer = NoSecurer()) {
      * defineHeaders has two actions : Completing the request builder with the provided headers,
      * and add a specific "Authorization" header based on the selected Securer instance.
      */
-    private fun RequestEntity.HeadersBuilder<*>.defineHeaders(headers: Map<String, String>)
+    private fun RequestEntity.HeadersBuilder<*>.defineHeaders(headers: Map<String, List<String>>)
             = securer.secure(
                 headers.entries.fold(this) {
-                    req, (key, value) -> req.header(key, value)
+                    req, (key, values) -> values.fold(req) {
+                        req2, value -> req2.header(key, value)
+                    }
                 })
-    private fun RequestEntity.BodyBuilder.defineHeaders(headers: Map<String, String>)
+    private fun RequestEntity.BodyBuilder.defineHeaders(headers: Map<String, List<String>>)
             = securer.secure(
                 headers.entries.fold(this) {
-                    req, (key, value) -> req.header(key, value)
+                    req, (key, values) -> values.fold(req) {
+                        req2, value -> req2.header(key, value)
+                    }
                 })
 }
