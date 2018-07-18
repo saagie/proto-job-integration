@@ -18,12 +18,14 @@ dsx:
   password: ${DSX_ADAPTER_PASSWORD}
 
 common:
-  project: ${PREDEFINED_PROJECT}
-  job: ${PREDEFINED_JOB}
+  username: ${JOBMANAGER_USERNAME}
+  password: ${JOBMANAGER_PASSWORD}
+  project: ${JOBMANAGER_PROJECT}
+  job: ${JOBMANAGER_JOB}
 
 spring:
   profiles:
-    active: trifacta,starter
+    active: knime,demo
 
 server:
   port: 8081
