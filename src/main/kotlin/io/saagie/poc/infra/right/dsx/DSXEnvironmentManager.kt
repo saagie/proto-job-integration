@@ -2,8 +2,10 @@ package io.saagie.poc.infra.right.dsx
 
 import io.saagie.poc.domain.EnvironmentManager
 import io.saagie.poc.domain.JobManager
+import io.saagie.poc.infra.right.common.Requester
 import io.saagie.poc.infra.right.common.generateBasicAuthKey
 import io.saagie.poc.infra.right.common.process
+import io.saagie.poc.infra.right.common.securer.TokenSecurer
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.Profile
@@ -25,13 +27,24 @@ class DSXEnvironmentManager(val restTemplate: RestTemplate) : EnvironmentManager
     @Value("\${dsx.password}")
     lateinit var password: String
 
+    /**
+     * DSX is using a token based auth, but the authentification request
+     * is currently using basic auth. to retrieve the token.
+     */
+    internal val requester = Requester(TokenSecurer<TokenDTO>(
+            username = username,
+            password = password,
+            tokenUrl = "${url}/v1/preauth/validateAuth",
+            tokenDTO = TokenDTO::class.java,
+            tokenExtractor = { it.accessToken },
+            restTemplate = restTemplate
+    ))
+
 
     // METHODS
     @Suppress("UNCHECKED_CAST")
     override fun getProjects() = restTemplate.process(
-            request = RequestEntity.get(URI("${url}/api/v2/filemgmt/view/"))
-                    .header("Authorization", "Bearer ${getToken()}")
-                    .build() as RequestEntity<Array<String>>,
+            request = requester.get<Array<String>>("${url}/api/v2/filemgmt/view/"),
             verify = { !(it?.isEmpty() ?: true) },
             transform = { it!!.filter { it.reversed().startsWith("/") }}
     )
@@ -41,25 +54,6 @@ class DSXEnvironmentManager(val restTemplate: RestTemplate) : EnvironmentManager
     override fun importProject(description: String, target: String) = throw UnsupportedOperationException()
 
     override fun exportProject(id: String) = throw UnsupportedOperationException()
-
-
-    // TOOLS
-    @Suppress("UNCHECKED_CAST")
-    @Cacheable("dsxTokenCache", sync = true)
-    internal fun getToken() = restTemplate.process(
-            request = RequestEntity.get(URI("${url}/v1/preauth/validateAuth"))
-                    .header("Authorization", "Basic ${generateAuthKey()}")
-                    .build() as RequestEntity<TokenDTO>,
-
-            verify = { it != null },
-            transform = { it!!.accessToken }
-    )
-
-    /**
-     * DSX is using a token based auth, but the authentification request
-     * is currently using basic auth. to retrieve the token.
-     */
-    private fun generateAuthKey() = generateBasicAuthKey(username, password)
 
 
     // DTOs

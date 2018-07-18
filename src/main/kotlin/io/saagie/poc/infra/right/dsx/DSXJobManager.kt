@@ -5,9 +5,6 @@ import io.saagie.poc.domain.Job
 import io.saagie.poc.domain.JobManager
 import io.saagie.poc.domain.JobStatus
 import io.saagie.poc.infra.right.common.process
-import org.springframework.http.MediaType
-import org.springframework.http.RequestEntity
-import java.net.URI
 
 class DSXJobManager(private val env: DSXEnvironmentManager, private val project: String) : JobManager {
     // METHODS
@@ -15,9 +12,7 @@ class DSXJobManager(private val env: DSXEnvironmentManager, private val project:
 
     @Suppress("UNCHECKED_CAST")
     override fun getAll() = env.restTemplate.process(
-            request = RequestEntity.get(URI("${env.url}/api/v2/filemgmt/view/$project"))
-                    .header("Authorization", "Bearer ${env.getToken()}")
-                    .build() as RequestEntity<Array<String>>,
+            request = env.requester.get<Array<String>>("${env.url}/api/v2/filemgmt/view/$project"),
             verify = { !(it?.isEmpty() ?: true) },
             transform = {
                 it!!.filter { it.reversed().startsWith(".jar".reversed()) }.map(::toJob)
@@ -26,35 +21,28 @@ class DSXJobManager(private val env: DSXEnvironmentManager, private val project:
 
     @Suppress("UNCHECKED_CAST")
     override fun getStatus(job: Job) = env.restTemplate.process(
-            request = RequestEntity.get(URI("${env.url}/api/v1/spark/status?jobId=${job.id}"))
-                    .header("Authorization", "Bearer ${env.getToken()}")
-                    .build() as RequestEntity<StatusDTO>,
+            request = env.requester.get<StatusDTO>("${env.url}/api/v1/spark/status?jobId=${job.id}"),
             verify = { it != null },
             transform = { toStatus(it!!.status) }
     )
 
     override fun start(target: String) = env.restTemplate.process(
-            request = RequestEntity.post(URI("${env.url}/api/v1/spark/submit"))
-                    .header("Authorization", "Bearer ${env.getToken()}")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(StartDTO(target))
+            request = env.requester.post(
+                    url = "${env.url}/api/v1/spark/submit",
+                    body = StartDTO(target)
+            )
     )
 
     override fun start(job: Job) = start(job.id)
 
     override fun stop(job: Job) = env.restTemplate.process(
-            request = RequestEntity.post(URI("${env.url}/api/v1/spark/cancel?jobId=${job.id}"))
-                    .header("Authorization", "Bearer ${env.getToken()}")
-                    .build()
+            request = env.requester.post(
+                    url = "${env.url}/api/v1/spark/cancel?jobId=${job.id}"
+            )
     )
 
-    override fun import(jobDescription: String, config: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun export(job: Job): String {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun import(jobDescription: String, target: String) = throw UnsupportedOperationException()
+    override fun export(job: Job) = throw UnsupportedOperationException()
 
 
     // TOOLS
