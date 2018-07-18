@@ -15,7 +15,6 @@ class Requester(private val securer: Securer = NoSecurer()) {
     )
             = RequestEntity.get(URI(url)).defineHeaders(headers).build() as RequestEntity<T>
 
-    @Suppress("UNCHECKED_CAST")
     fun <T> post(
             url: String,
             body: T,
@@ -23,6 +22,14 @@ class Requester(private val securer: Securer = NoSecurer()) {
             mediaType: MediaType = MediaType.APPLICATION_JSON
     )
             = RequestEntity.post(URI(url)).defineHeaders(headers).contentType(mediaType).body(body)
+
+    @Suppress("UNCHECKED_CAST")
+    fun post(
+            url: String,
+            headers: Map<String, List<String>> = mapOf(),
+            mediaType: MediaType = MediaType.APPLICATION_JSON
+    )
+            = RequestEntity.post(URI(url)).defineHeaders(headers).contentType(mediaType).build()
 
 
     // TOOLS

@@ -144,6 +144,18 @@ class RequesterTest {
     }
 
     @Test
+    fun `'post' method create an appropriate request when no body is given`() {
+        // Given
+        // When
+        val request = requester.post(url)
+
+        // Then
+        assertThat(request.url).isEqualTo(URI(url))
+        assertThat(request.method).isEqualTo(HttpMethod.POST)
+        assertThat(request.hasBody()).isFalse()
+    }
+
+    @Test
     fun `'post' method correctly pass all headers given in argument`() {
         // Given
         val body = "body"
