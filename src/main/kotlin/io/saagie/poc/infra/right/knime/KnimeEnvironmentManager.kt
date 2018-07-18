@@ -1,8 +1,10 @@
 package io.saagie.poc.infra.right.knime
 
 import io.saagie.poc.domain.EnvironmentManager
+import io.saagie.poc.infra.right.common.Requester
 import io.saagie.poc.infra.right.common.generateBasicAuthKey
 import io.saagie.poc.infra.right.common.process
+import io.saagie.poc.infra.right.common.securer.BasicSecurer
 import io.saagie.poc.infra.right.common.toProperURL
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -27,15 +29,14 @@ class KnimeEnvironmentManager(val restTemplate: RestTemplate) : EnvironmentManag
     @Value("\${knime.password}")
     lateinit var password: String
 
+    internal val requester = Requester(BasicSecurer(username, password))
 
     // METHODS
     @Suppress("UNCHECKED_CAST")
     override fun getProjects(): Collection<String> {
         // Making the request to the KNIME API
         fun requestProject(name: String) = restTemplate.process(
-                request = RequestEntity.get(URI("$url/repository$name".toProperURL()))
-                        .header("Authorization", "Basic ${generateAuthKey()}")
-                        .build() as RequestEntity<RepositoryDTO>,
+                request = requester.get<RepositoryDTO>("$url/repository$name".toProperURL()),
                 verify = { !(it?.children?.isEmpty() ?: true) },
                 transform = { it!! }
         )
@@ -65,15 +66,7 @@ class KnimeEnvironmentManager(val restTemplate: RestTemplate) : EnvironmentManag
     override fun getJobManager(project: String?) = KnimeJobManager(this, project!!)
 
     override fun importProject(description: String, target: String) = throw UnsupportedOperationException()
-
     override fun exportProject(id: String)= throw UnsupportedOperationException()
-
-
-    // TOOLS
-    /**
-     * Knime is using basic auth.
-     */
-    internal fun generateAuthKey() = generateBasicAuthKey(username, password)
 
 
     // DTOs

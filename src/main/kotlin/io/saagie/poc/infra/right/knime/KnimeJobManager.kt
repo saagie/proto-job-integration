@@ -18,10 +18,7 @@ class KnimeJobManager(private val env: KnimeEnvironmentManager, private val proj
 
     @Suppress("UNCHECKED_CAST")
     override fun getAll() = env.restTemplate.process(
-            request = RequestEntity.get(URI("${env.url}/jobs/"))
-                    .header("Authorization", "Basic ${env.generateAuthKey()}")
-                    .build() as RequestEntity<ResponseDTO>,
-
+            request = env.requester.get<ResponseDTO>("${env.url}/jobs/"),
             verify = {
                 !(it?.jobs?.isEmpty() ?: true)
                 && (it?.jobs?.any(::inProject) ?: false)
@@ -31,10 +28,7 @@ class KnimeJobManager(private val env: KnimeEnvironmentManager, private val proj
 
     @Suppress("UNCHECKED_CAST")
     override fun get(id: String) = env.restTemplate.process(
-            request = RequestEntity.get(URI("${env.url}/jobs/${id}/"))
-                    .header("Authorization", "Basic ${env.generateAuthKey()}")
-                    .build() as RequestEntity<JobDTO>,
-
+            request = env.requester.get<JobDTO>("${env.url}/jobs/${id}/"),
             verify = { it != null && inProject(it) },
             transform = { toJob(it!!) }
     )
@@ -43,10 +37,10 @@ class KnimeJobManager(private val env: KnimeEnvironmentManager, private val proj
     override fun getStatus(job: Job) = get(job.id).status
 
     override fun start(target: String) = env.restTemplate.process(
-            request = RequestEntity.post(URI("${env.url}/jobs/$target/".toProperURL()))
-                    .header("Authorization", "Basic ${env.generateAuthKey()}")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body("{}")
+            request = env.requester.post(
+                url = "${env.url}/jobs/$target/".toProperURL(),
+                body ="{}"
+            )
     )
 
     override fun start(job: Job) = start(job.id)
@@ -55,18 +49,15 @@ class KnimeJobManager(private val env: KnimeEnvironmentManager, private val proj
     override fun stop(job: Job) = throw UnsupportedOperationException()
 
     override fun import(jobDescription: String, target: String) = env.restTemplate.process(
-            request = RequestEntity.post(URI("${env.url}/repository$target:jobs".toProperURL()))
-                    .header("Authorization", "Basic ${env.generateAuthKey()}")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(jobDescription)
+            request = env.requester.post(
+                    url = "${env.url}/repository$target:jobs".toProperURL(),
+                    body = jobDescription
+            )
     )
 
     @Suppress("UNCHECKED_CAST")
     override fun export(job: Job) = env.restTemplate.process(
-            request = RequestEntity.get(URI("${env.url}/jobs/${job.id}/"))
-                    .header("Authorization", "Basic ${env.generateAuthKey()}")
-                    .build() as RequestEntity<String>,
-
+            request = env.requester.get<String>("${env.url}/jobs/${job.id}/"),
             verify = { !(it?.isBlank() ?: true) },
             transform = { it!! }
     )
