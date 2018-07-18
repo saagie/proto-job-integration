@@ -1,6 +1,7 @@
 package io.saagie.poc.infra.right.trifacta
 
 import io.saagie.poc.domain.EnvironmentManager
+import io.saagie.poc.infra.AppProperties
 import io.saagie.poc.infra.right.common.Requester
 import io.saagie.poc.infra.right.common.securer.BasicSecurer
 import io.saagie.poc.infra.right.trifacta.TrifactaEnvironmentManager.companion.DEFAULT_PROJECT_NAME
@@ -11,22 +12,17 @@ import org.springframework.web.client.RestTemplate
 
 @Component
 @Profile("trifacta")
-class TrifactaEnvironmentManager(val restTemplate: RestTemplate) : EnvironmentManager {
+class TrifactaEnvironmentManager(val restTemplate: RestTemplate, private val properties: AppProperties) : EnvironmentManager {
     object companion {
         val DEFAULT_PROJECT_NAME = "DEFAULT" // Projects doesn't exist in Trifacta for now...
     }
 
     // ATTRIBUTES
-    @Value("\${trifacta.url}")
-    lateinit var url: String
-
-    @Value("\${trifacta.username}")
-    lateinit var username: String
-
-    @Value("\${trifacta.password}")
-    lateinit var password: String
-
-    internal val requester = Requester(BasicSecurer(username, password))
+    internal val url: String = properties.trifacta.url
+    internal val requester = Requester(BasicSecurer(
+            username = properties.trifacta.username,
+            password = properties.trifacta.password
+    ))
 
 
     // METHODS

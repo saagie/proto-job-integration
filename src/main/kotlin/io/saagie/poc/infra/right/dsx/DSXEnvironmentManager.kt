@@ -2,6 +2,7 @@ package io.saagie.poc.infra.right.dsx
 
 import io.saagie.poc.domain.EnvironmentManager
 import io.saagie.poc.domain.JobManager
+import io.saagie.poc.infra.AppProperties
 import io.saagie.poc.infra.right.common.Requester
 import io.saagie.poc.infra.right.common.generateBasicAuthKey
 import io.saagie.poc.infra.right.common.process
@@ -16,25 +17,18 @@ import java.net.URI
 
 @Component
 @Profile("dsx")
-class DSXEnvironmentManager(val restTemplate: RestTemplate) : EnvironmentManager {
+class DSXEnvironmentManager(val restTemplate: RestTemplate, private val properties: AppProperties) : EnvironmentManager {
     // ATTRIBUTES
-    @Value("\${dsx.url}")
-    lateinit var url: String
-
-    @Value("\${dsx.username}")
-    lateinit var username: String
-
-    @Value("\${dsx.password}")
-    lateinit var password: String
+    internal val url = properties.dsx.url
 
     /**
      * DSX is using a token based auth, but the authentification request
      * is currently using basic auth. to retrieve the token.
      */
     internal val requester = Requester(TokenSecurer<TokenDTO>(
-            username = username,
-            password = password,
-            tokenUrl = "${url}/v1/preauth/validateAuth",
+            username = properties.dsx.username,
+            password = properties.dsx.password,
+            tokenUrl = "$url/v1/preauth/validateAuth",
             tokenDTO = TokenDTO::class.java,
             tokenExtractor = { it.accessToken },
             restTemplate = restTemplate

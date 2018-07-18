@@ -1,6 +1,7 @@
 package io.saagie.poc.infra.right.dataiku
 
 import io.saagie.poc.domain.EnvironmentManager
+import io.saagie.poc.infra.AppProperties
 import io.saagie.poc.infra.right.common.Requester
 import io.saagie.poc.infra.right.common.generateBasicAuthKey
 import io.saagie.poc.infra.right.common.process
@@ -14,18 +15,14 @@ import java.net.URI
 
 @Component
 @Profile("dataiku")
-class DataikuEnvironmentManager(val restTemplate: RestTemplate) : EnvironmentManager {
+class DataikuEnvironmentManager(val restTemplate: RestTemplate, private val properties: AppProperties) : EnvironmentManager {
     // ATTRIBUTES
-    @Value("\${dataiku.url}")
-    lateinit var url: String
-
-    @Value("\${dataiku.apikey}")
-    lateinit var apikey: String
+    internal val url = properties.dataiku.url
 
     /**
      * Dataiku is using basic auth, with a simple apikey as username and no password.
      */
-    internal val requester = Requester(BasicSecurer(apikey))
+    internal val requester = Requester(BasicSecurer(properties.dataiku.apikey))
 
 
     // METHODS
