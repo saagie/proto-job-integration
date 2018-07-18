@@ -1,63 +1,46 @@
 package io.saagie.poc.infra.right.trifacta
 
-import com.google.gson.Gson
 import io.saagie.poc.domain.Dataset
 import io.saagie.poc.domain.Job
 import io.saagie.poc.domain.JobManager
 import io.saagie.poc.domain.JobStatus
 import io.saagie.poc.infra.right.common.process
-import org.springframework.http.MediaType
-import org.springframework.http.RequestEntity
-import java.net.URI
 
 
 class TrifactaJobManager(private val env:TrifactaEnvironmentManager) : JobManager {
     // METHODS
     @Suppress("UNCHECKED_CAST")
     override fun getDatasets() = env.restTemplate.process(
-            request = RequestEntity.get(URI("${env.url}/wrangledDatasets"))
-                    .header("Authorization", "Basic ${env.generateAuthKey()}")
-                    .build() as RequestEntity<DatasetsDTO>,
-
+            request = env.requester.get<DatasetsDTO>("${env.url}/wrangledDatasets"),
             verify = { !(it?.data?.isEmpty() ?: true) },
             transform = { it!!.data.map(::toDataset) }
     )
 
     @Suppress("UNCHECKED_CAST")
     override fun getAll() = env.restTemplate.process(
-            request = RequestEntity.get(URI("${env.url}/jobGroups"))
-                    .header("Authorization", "Basic ${env.generateAuthKey()}")
-                    .build() as RequestEntity<JobsDTO>,
-
+            request = env.requester.get<JobsDTO>("${env.url}/jobGroups"),
             verify = { !(it?.data?.isEmpty() ?: true) },
             transform = { it!!.data.map(::toJob) }
     )
 
     @Suppress("UNCHECKED_CAST")
     override fun get(id: String) = env.restTemplate.process(
-            request = RequestEntity.get(URI("${env.url}/jobGroups/$id"))
-                    .header("Authorization", "Basic ${env.generateAuthKey()}")
-                    .build() as RequestEntity<JobDTO>,
-
+            request = env.requester.get<JobDTO>("${env.url}/jobGroups/$id"),
             verify = { it != null },
             transform = { toJob(it!!) }
     )
 
     @Suppress("UNCHECKED_CAST")
     override fun getStatus(job: Job) = env.restTemplate.process(
-            request = RequestEntity.get(URI("${env.url}/jobGroups/${job.id}/status"))
-                    .header("Authorization", "Basic ${env.generateAuthKey()}")
-                    .build() as RequestEntity<String>,
+            request = env.requester.get<String>("${env.url}/jobGroups/${job.id}/status"),
             transform = { toStatus(it!!) }
     )
 
     override fun start(target: String) = env.restTemplate.process(
-            request = RequestEntity.post(URI("${env.url}/jobGroups"))
-                    .header("Authorization", "Basic ${env.generateAuthKey()}")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(
-                            RunDTO(IDDTO(target.toIntOrNull()))
-                    )
+            request = env.requester.post(
+                    url = "${env.url}/jobGroups",
+                    body = RunDTO(IDDTO(target.toIntOrNull()))
+            )
     )
 
     override fun stop(job: Job) {
@@ -65,22 +48,17 @@ class TrifactaJobManager(private val env:TrifactaEnvironmentManager) : JobManage
     }
 
     override fun import(jobDescription: String, target: String) = env.restTemplate.process(
-            request = RequestEntity.post(URI("${env.url}/wrangledDatasets/"))
-                    .header("Authorization", "Basic ${env.generateAuthKey()}")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(
-                            jobDescription
-                    )
+            request = env.requester.post(
+                    url = "${env.url}/wrangledDatasets/",
+                    body = jobDescription
+            )
     )
 
     @Suppress("UNCHECKED_CAST")
     override fun export(job: Job) = env.restTemplate.process(
-        request = RequestEntity.get(URI("${env.url}/wrangledDatasets/${job.id}"))
-                .header("Authorization", "Basic ${env.generateAuthKey()}")
-                .build() as RequestEntity<Any>,
-
+        request = env.requester.get<String>("${env.url}/wrangledDatasets/${job.id}"),
         verify = { it != null },
-        transform = { Gson().toJson(it!!) }
+        transform = { it!! }
     )
 
 

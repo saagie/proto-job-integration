@@ -1,8 +1,8 @@
 package io.saagie.poc.infra.right.trifacta
 
 import io.saagie.poc.domain.EnvironmentManager
-import io.saagie.poc.domain.JobManager
-import io.saagie.poc.infra.right.common.generateBasicAuthKey
+import io.saagie.poc.infra.right.common.Requester
+import io.saagie.poc.infra.right.common.securer.BasicSecurer
 import io.saagie.poc.infra.right.trifacta.TrifactaEnvironmentManager.companion.DEFAULT_PROJECT_NAME
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
@@ -26,6 +26,8 @@ class TrifactaEnvironmentManager(val restTemplate: RestTemplate) : EnvironmentMa
     @Value("\${trifacta.password}")
     lateinit var password: String
 
+    internal val requester = Requester(BasicSecurer(username, password))
+
 
     // METHODS
     override fun getProjects() = listOf(DEFAULT_PROJECT_NAME)
@@ -35,7 +37,4 @@ class TrifactaEnvironmentManager(val restTemplate: RestTemplate) : EnvironmentMa
     override fun importProject(description: String, target: String) = throw UnsupportedOperationException()
 
     override fun exportProject(id: String)= throw UnsupportedOperationException()
-
-    // TOOLS
-    internal fun generateAuthKey() = generateBasicAuthKey(username, password)
 }
