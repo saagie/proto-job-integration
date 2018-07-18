@@ -1,15 +1,11 @@
 package io.saagie.poc.infra.right.knime
 
-import com.google.gson.Gson
 import io.saagie.poc.domain.Dataset
 import io.saagie.poc.domain.Job
 import io.saagie.poc.domain.JobManager
 import io.saagie.poc.domain.JobStatus
 import io.saagie.poc.infra.right.common.process
 import io.saagie.poc.infra.right.common.toProperURL
-import org.springframework.http.MediaType
-import org.springframework.http.RequestEntity
-import java.net.URI
 
 
 class KnimeJobManager(private val env: KnimeEnvironmentManager, private val project: String) : JobManager {

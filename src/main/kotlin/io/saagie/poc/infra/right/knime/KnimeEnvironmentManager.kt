@@ -2,19 +2,15 @@ package io.saagie.poc.infra.right.knime
 
 import io.saagie.poc.domain.EnvironmentManager
 import io.saagie.poc.infra.right.common.Requester
-import io.saagie.poc.infra.right.common.generateBasicAuthKey
 import io.saagie.poc.infra.right.common.process
 import io.saagie.poc.infra.right.common.securer.BasicSecurer
 import io.saagie.poc.infra.right.common.toProperURL
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus
-import org.springframework.http.RequestEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.server.ResponseStatusException
-import java.net.URI
 
 @Component
 @Profile("knime")
