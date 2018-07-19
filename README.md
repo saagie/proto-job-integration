@@ -62,22 +62,22 @@ To modify the profile at launch, you should use a command like :
 
 
 ### Interactive demo
-It includes the following commands :
+
+*In this demo, every job or project will be displayed with a specific number like : `$ID : $OBJECT`.
+ This number will define a local ID, which is required by the local demo tool to realize some of the other functionalities*
 
 **At any time**
 - `projects` : Displays a list of all projects registered on the selected platform. (In Trifacta, as the *'project'* notion doesn't exist, only the value DEFAULT will be displayed.)
-- `use $PROJECT` : Set which project to use for the next commands.
+- `use $PROJECT_ID` : Set which project to use for the next commands.
 
 **After setting the project**
 - `datasets` :  Displays a list of all datasets.
 - `jobs` : Displays a list of all jobs and store their informations in order to manipulate them later. 
 
-*Every job will be displayed with a specific number like : `$ID > $DESCRIPTION`, which is required by other commands.*
-
 **After setting the project and getting all jobs**
-- `status $ID` : Give the current status of the selected job
-- `start $ID` : Starts the specified job.
-- `stop $ID` : Stops the given job if currently running. Useless if the job's already done.
+- `status $JOB_ID` : Give the current status of the selected job
+- `start $JOB_ID` : Starts the specified job.
+- `stop $JOB_ID` : Stops the given job if currently running. Useless if the job's already done.
 
 ## Dev' setup
 1) In **IntelliJ**, open `Run` > `Edit configurations`
