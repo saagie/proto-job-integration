@@ -1,6 +1,7 @@
 package io.saagie.poc.infra.left
 
 import io.saagie.poc.domain.EnvironmentManager
+import io.saagie.poc.domain.Project
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.CommandLineRunner
 import org.springframework.context.annotation.Profile
@@ -21,7 +22,7 @@ class Starter(private val envManager: EnvironmentManager) : CommandLineRunner {
     override fun run(vararg args: String?) {
         // Getting projects display
         display("Projects", envManager.getProjects().toList())
-        val jobManager = envManager.getJobManager(project)
+        val jobManager = envManager.getJobManager(Project(project))
 
         // Getting datasets
         display("Datasets", jobManager.getDatasets().toList())

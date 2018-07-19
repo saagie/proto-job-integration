@@ -1,6 +1,8 @@
 package io.saagie.poc.infra.right.trifacta
 
 import io.saagie.poc.domain.EnvironmentManager
+import io.saagie.poc.domain.JobManager
+import io.saagie.poc.domain.Project
 import io.saagie.poc.infra.AppProperties
 import io.saagie.poc.infra.right.common.Requester
 import io.saagie.poc.infra.right.common.securer.BasicSecurer
@@ -26,11 +28,11 @@ class TrifactaEnvironmentManager(val restTemplate: RestTemplate, private val pro
 
 
     // METHODS
-    override fun getProjects() = listOf(DEFAULT_PROJECT_NAME)
+    override fun getProjects(): Collection<Project> = listOf(Project(DEFAULT_PROJECT_NAME))
 
-    override fun getJobManager(project: String?) = TrifactaJobManager(this)
+    override fun getJobManager(project: Project?): JobManager = TrifactaJobManager(this)
 
     override fun importProject(description: String, target: String) = throw UnsupportedOperationException()
 
-    override fun exportProject(id: String)= throw UnsupportedOperationException()
+    override fun exportProject(project: Project): String = throw UnsupportedOperationException()
 }

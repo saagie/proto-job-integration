@@ -3,6 +3,7 @@ package io.saagie.poc.infra.left
 import io.saagie.poc.domain.EnvironmentManager
 import io.saagie.poc.domain.Job
 import io.saagie.poc.domain.JobManager
+import io.saagie.poc.domain.Project
 import org.springframework.boot.CommandLineRunner
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
@@ -17,6 +18,7 @@ class InteractiveDemo(private val envManager: EnvironmentManager) : CommandLineR
             }
         }
 
+        var projects = listOf<Project>()
         var jobs = listOf<Job>()
         var lastImport = ""
         lateinit var jobManager: JobManager
@@ -27,12 +29,15 @@ class InteractiveDemo(private val envManager: EnvironmentManager) : CommandLineR
             try {
                 when (params[0]) {
                     "projects" -> {
-                        display(envManager.getProjects().toList().reversed())
+                        projects = envManager.getProjects().toList().reversed()
+                        display(projects)
                     }
                     "use" -> {
-                        jobManager = envManager.getJobManager(params[1])
+                        val i = params[1].toInt()
+                        val project = projects[i - 1]
+                        jobManager = envManager.getJobManager(project)
                         jobs = listOf()
-                        println("The project has been switched to ${params[1]}")
+                        println("The project has been switched to ${project.name}")
                     }
                     "datasets" -> {
                         display(jobManager.getDatasets().toList().reversed())

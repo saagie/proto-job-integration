@@ -1,6 +1,8 @@
 package io.saagie.poc.infra.right.knime
 
 import io.saagie.poc.domain.EnvironmentManager
+import io.saagie.poc.domain.JobManager
+import io.saagie.poc.domain.Project
 import io.saagie.poc.infra.AppProperties
 import io.saagie.poc.infra.right.common.Requester
 import io.saagie.poc.infra.right.common.backtrackSearch
@@ -23,7 +25,7 @@ class KnimeEnvironmentManager(val restTemplate: RestTemplate, private val proper
 
     // METHODS
     @Suppress("UNCHECKED_CAST")
-    override fun getProjects(): Collection<String> {
+    override fun getProjects(): Collection<Project> {
         // Making the request to the KNIME API
         fun getProjectInfos(name: String) = restTemplate.process(
                 request = requester.get<RepositoryDTO>("$url/repository$name".correctURL()),
@@ -37,13 +39,13 @@ class KnimeEnvironmentManager(val restTemplate: RestTemplate, private val proper
                     .filter { it.type == "Workflow" || it.type == "WorkflowGroup" }
                     .map { it.path }
                     .toSet()
-        }.minus("/")
+        }.minus("/").map(::Project)
     }
 
-    override fun getJobManager(project: String?) = KnimeJobManager(this, project!!)
+    override fun getJobManager(project: Project?): JobManager = KnimeJobManager(this, project!!.id)
 
     override fun importProject(description: String, target: String) = throw UnsupportedOperationException()
-    override fun exportProject(id: String)= throw UnsupportedOperationException()
+    override fun exportProject(project: Project): String = throw UnsupportedOperationException()
 
 
     // DTOs

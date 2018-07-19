@@ -1,6 +1,8 @@
 package io.saagie.poc.infra.right.dsx
 
 import io.saagie.poc.domain.EnvironmentManager
+import io.saagie.poc.domain.JobManager
+import io.saagie.poc.domain.Project
 import io.saagie.poc.infra.AppProperties
 import io.saagie.poc.infra.right.common.Requester
 import io.saagie.poc.infra.right.common.process
@@ -34,14 +36,14 @@ class DSXEnvironmentManager(val restTemplate: RestTemplate, private val properti
     override fun getProjects() = restTemplate.process(
             request = requester.get<Array<String>>("${url}/api/v2/filemgmt/view/"),
             verify = { !(it?.isEmpty() ?: true) },
-            transform = { it!!.filter { it.reversed().startsWith("/") }}
+            transform = { it!!.filter { it.reversed().startsWith("/") }.map(::Project)}
     )
 
-    override fun getJobManager(project: String?) = DSXJobManager(this, project!!)
+    override fun getJobManager(project: Project?): JobManager = DSXJobManager(this, project!!.id)
 
     override fun importProject(description: String, target: String) = throw UnsupportedOperationException()
 
-    override fun exportProject(id: String) = throw UnsupportedOperationException()
+    override fun exportProject(project: Project): String = throw UnsupportedOperationException()
 
 
     // DTOs

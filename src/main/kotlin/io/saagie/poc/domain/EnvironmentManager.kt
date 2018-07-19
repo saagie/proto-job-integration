@@ -1,11 +1,11 @@
 package io.saagie.poc.domain
 
 interface EnvironmentManager {
-    fun getProjects() : Collection<String>
+    fun getProjects() : Collection<Project>
 
-    fun getJobManager(project: String? = null) : JobManager
+    fun getJobManager(project: Project? = null) : JobManager
 
     fun importProject(description: String, target: String = "")
 
-    fun exportProject(id: String): String
+    fun exportProject(project: Project): String
 }
