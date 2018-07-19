@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.RequestEntity
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.server.ResponseStatusException
+import java.net.URLEncoder
 import java.util.*
 
 /**
@@ -14,10 +15,20 @@ fun encode64(txt: String) = String(
 )
 
 /**
- * Generate the header key for basic authentification
- * based on an username and a password.
+ * Transforms a sentence into an URL-ready String.
  */
-fun generateBasicAuthKey(username: String, password: String = "") = encode64("$username:$password")
+fun String.correctURL() = this.replace(" ", "%20")
+
+
+/**
+ * Provide a simple implementation of a backtracking algorithm.
+ * This function will retrieve all elements form a tree-like structures by following
+ * the instructions provided by the 'operation' argument.
+ */
+fun <T> backtrackSearch(initial: T, operation: (T) -> Set<T>): Set<T> =
+        operation(initial).fold(setOf(initial)) {
+            set, child -> set + backtrackSearch(child, operation)
+        }
 
 /**
  * Process the incoming request, checks the response's body (if there's any),
@@ -56,9 +67,3 @@ inline fun <reified T, R> RestTemplate.process(
  */
 inline fun <reified T> RestTemplate.process(request: RequestEntity<T>, noinline verify: (T?) -> Boolean = { true })
         = this.process(request, {}, verify)
-
-
-/**
- * Transforms a sentence into an URK-ready String.
- */
-fun String.toProperURL() = this.replace(" ", "%20")

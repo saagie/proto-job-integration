@@ -5,7 +5,7 @@ import io.saagie.poc.domain.Job
 import io.saagie.poc.domain.JobManager
 import io.saagie.poc.domain.JobStatus
 import io.saagie.poc.infra.right.common.process
-import io.saagie.poc.infra.right.common.toProperURL
+import io.saagie.poc.infra.right.common.correctURL
 
 
 class KnimeJobManager(private val env: KnimeEnvironmentManager, private val project: String) : JobManager {
@@ -34,7 +34,7 @@ class KnimeJobManager(private val env: KnimeEnvironmentManager, private val proj
 
     override fun start(target: String) = env.restTemplate.process(
             request = env.requester.post(
-                url = "${env.url}/jobs/$target/".toProperURL(),
+                url = "${env.url}/jobs/$target/".correctURL(),
                 body ="{}"
             )
     )
@@ -46,7 +46,7 @@ class KnimeJobManager(private val env: KnimeEnvironmentManager, private val proj
 
     override fun import(jobDescription: String, target: String) = env.restTemplate.process(
             request = env.requester.post(
-                    url = "${env.url}/repository$target:jobs".toProperURL(),
+                    url = "${env.url}/repository$target:jobs".correctURL(),
                     body = jobDescription
             )
     )
