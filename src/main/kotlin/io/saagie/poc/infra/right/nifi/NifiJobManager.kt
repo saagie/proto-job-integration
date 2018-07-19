@@ -13,31 +13,36 @@ class NifiJobManager(private val env: NifiEnvironmentManager, private val projec
     override fun getAll() = env.restTemplate.process(
             request = env.requester.get<AllProcessorsDTO>("${env.url}/process-groups/$project/processors"),
             verify = { it?.processors?.isNotEmpty() ?: false},
-            transform = { it!!.processors.map { it.component.toJob() }}
+            transform = { it!!.processors.map { it.toJob() }}
     )
 
     override fun get(id: String) = env.restTemplate.process(
-            request = env.requester.get<ProcessorDTO>("${env.url}/processors/$id"),
+            request = env.requester.get<JobDTO>("${env.url}/processors/$id"),
             verify = { it != null },
-            transform = { it!!.component.toJob() }
+            transform = { it!!.toJob() }
     )
 
     override fun getStatus(job: Job) = get(job.id).status
 
-    override fun start(target: String) = env.restTemplate.process(
-            request = env.requester.put(
-                    url = "${env.url}/processors/$target",
-                    body = StartStopJobDTO("RUNNING")
-            )
-    )
-    override fun start(job: Job) = start(job.id)
+    override fun start(job: Job) {
+        env.restTemplate.process(
+                request = env.requester.put(
+                        url = "${env.url}/processors/${job.id}",
+                        body = StartStopJobDTO(job, "RUNNING")
+                )
+        )
+        job.updates += 1
+    }
 
-    override fun stop(job: Job) = env.restTemplate.process(
-            request = env.requester.put(
-                    url = "${env.url}/processors/${job.id}",
-                    body = StartStopJobDTO("STOPPED")
-            )
-    )
+    override fun stop(job: Job) {
+        env.restTemplate.process(
+                request = env.requester.put(
+                        url = "${env.url}/processors/${job.id}",
+                        body = StartStopJobDTO(job, "STOPPED")
+                )
+        )
+        job.updates += 1
+    }
 
     override fun import(jobDescription: String, target: String) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
@@ -50,9 +55,10 @@ class NifiJobManager(private val env: NifiEnvironmentManager, private val projec
 
     // TOOLS
     private fun JobDTO.toJob() = Job(
-            id = this.id,
+            id = this.component.id,
             target = project,
-            status = this.state.toStatus()
+            status = this.component.state.toStatus(),
+            updates = this.revision.version.toInt()
     )
 
     private fun String.toStatus() = when (this.toUpperCase()) {
@@ -66,26 +72,36 @@ class NifiJobManager(private val env: NifiEnvironmentManager, private val projec
     // DTOs
     // -- GET
     data class AllProcessorsDTO(
-            val processors: Array<ProcessorDTO> = arrayOf()
-    )
-    data class ProcessorDTO(
-            val component: JobDTO = JobDTO()
+            val processors: Array<JobDTO> = arrayOf()
     )
     data class JobDTO(
+            val component: JobIntelDTO = JobIntelDTO(),
+            val revision: RevisionDTO = RevisionDTO()
+    )
+    data class JobIntelDTO(
             val id: String = "",
             val state: String = ""
     )
-    data class RevisionDTO
+    data class RevisionDTO(
+            val version: String = ""
+    )
 
     // -- PUT
     data class StartStopJobDTO(
+            val component: ComponentDTO = ComponentDTO(),
+            val revision: RevisionDTO = RevisionDTO(),
             val status: StatusDTO = StatusDTO()
     ) {
-        constructor(id: String, runStatus: String): this(StatusDTO(runStatus))
+        constructor(job: Job, newRunStatus: String): this(
+                component = ComponentDTO(job.id),
+                revision = RevisionDTO(job.updates.toString()),
+                status = StatusDTO(newRunStatus)
+        )
     }
+    data class ComponentDTO(
+            val id: String = ""
+    )
     data class StatusDTO(
-            val component: JobDTO = JobDTO(),
-            val revision: RevisionDTO = RevisionDTO(),
             val runStatus: String = ""
     )
 }
