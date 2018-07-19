@@ -61,9 +61,10 @@ class InteractiveDemo(private val envManager: EnvironmentManager) : CommandLineR
                         println("The job has been stopped !")
                     }
                     "import" -> {
-                        val target = params[1]
-                        jobManager.import(lastImport, target)
-                        println("The job has been imported to $target !")
+                        val i = params[1].toInt()
+                        val project = projects[i - 1]
+                        jobManager.import(lastImport, project.id)
+                        println("The job has been imported to ${project.name} !")
                     }
                     "export" -> {
                         val i = params[1].toInt()

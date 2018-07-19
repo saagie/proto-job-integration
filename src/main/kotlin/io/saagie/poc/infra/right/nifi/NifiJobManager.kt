@@ -45,12 +45,20 @@ class NifiJobManager(private val env: NifiEnvironmentManager, private val projec
     }
 
     override fun import(jobDescription: String, target: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        println(prepareForImport(jobDescription))
+        env.restTemplate.process(
+                request = env.requester.post(
+                        url = "${env.url}/process-groups/$target/processors",
+                        body = prepareForImport(jobDescription)
+                )
+        )
     }
 
-    override fun export(job: Job): String {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun export(job: Job) = env.restTemplate.process(
+            request = env.requester.get<String>("${env.url}/processors/${job.id}"),
+            verify = { it != null },
+            transform = { it!! }
+    )
 
 
     // TOOLS
@@ -66,6 +74,19 @@ class NifiJobManager(private val env: NifiEnvironmentManager, private val projec
             "DISABLED" -> JobStatus.ABORTED
             "RUNNING"  -> JobStatus.RUNNING
             else -> JobStatus.UNKNOWN
+    }
+
+    fun prepareForImport(jobDescription: String): String {
+        // Putting revision number at 0 (and removing a first occurence of processor's ID)
+        val jobDescriptionWithRevision = jobDescription.replace(
+                "\"revision\":\\{\"version\":[0-9]+},\"id\":\".*\",\"uri".toRegex(),
+                "\"revision\":{\"version\":0},\"uri"
+        )
+        // Removing ID and parent ID (will be defined by Nifi itself)
+        return jobDescriptionWithRevision.replace(
+                "\"component\":\\{\"id\":\".*\",\"parentGroupId\":\".*\",\"position".toRegex(),
+                "\"component\":{\"position"
+        )
     }
 
 
