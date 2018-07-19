@@ -17,6 +17,9 @@ dsx:
   username: ${DSX_ADAPTER_USERNAME}
   password: ${DSX_ADAPTER_PASSWORD}
 
+nifi:
+  url: ${NIFI_ADAPTER_URL}
+
 common:
   username: ${JOBMANAGER_USERNAME}
   password: ${JOBMANAGER_PASSWORD}

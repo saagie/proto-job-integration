@@ -8,6 +8,7 @@ data class AppProperties(
         val knime: DefaultProperties = DefaultProperties(),
         val trifacta: DefaultProperties = DefaultProperties(),
         val dsx: DefaultProperties = DefaultProperties(),
+        val nifi: NifiProperties = NifiProperties(),
         val commonProperties: CommonProperties = CommonProperties()
 )
 
@@ -25,4 +26,7 @@ class CommonProperties {
     lateinit var password: String
     lateinit var project: String
     lateinit var job: String
+}
+class NifiProperties {
+    lateinit var url: String
 }
