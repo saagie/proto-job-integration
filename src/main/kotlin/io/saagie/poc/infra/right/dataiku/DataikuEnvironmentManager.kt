@@ -3,15 +3,11 @@ package io.saagie.poc.infra.right.dataiku
 import io.saagie.poc.domain.EnvironmentManager
 import io.saagie.poc.infra.AppProperties
 import io.saagie.poc.infra.right.common.Requester
-import io.saagie.poc.infra.right.common.generateBasicAuthKey
 import io.saagie.poc.infra.right.common.process
 import io.saagie.poc.infra.right.common.securer.BasicSecurer
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
-import org.springframework.http.RequestEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
-import java.net.URI
 
 @Component
 @Profile("dataiku")
