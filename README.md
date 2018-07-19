@@ -1,4 +1,3 @@
-
 # POC - Job management  
 This POC consists on a simple library which will provide elementary functionalities to handle your jobs management.  
 This management is made by delegation, using one of our partner's software :  
@@ -89,6 +88,7 @@ To modify the profile at launch, you should use a command like :
   
 ## Dev' setup  
 **KISS**
+
 1) In **IntelliJ**, open `Run` > `Edit configurations`  
   
 2) Add a new Spring Boot configuration (+), and specify the main class of the app `io.saagie.poc.infra.AppKt`  
@@ -102,6 +102,7 @@ To modify the profile at launch, you should use a command like :
 5) Run it through your IDE  
   
 **Build and run**
+
 Build the app by using `mvn clean package`, and then edit the provided utility script `start.sh`, by adding/updating, all environment variables to overload before executing the jar. 
 
 Then, you'll be able to launch the app by using `./start.sh $PATH_TO_YOUR_JAR`.
