@@ -20,7 +20,8 @@ class InteractiveDemo(private val envManager: EnvironmentManager) : CommandLineR
 
         var projects = listOf<Project>()
         var jobs = listOf<Job>()
-        var lastImport = ""
+        var lastExport = ""
+        var lastDownload = ""
         lateinit var jobManager: JobManager
         println("\nThe DSS demonstration tool is now operational !!")
         do {
@@ -38,6 +39,17 @@ class InteractiveDemo(private val envManager: EnvironmentManager) : CommandLineR
                         jobManager = envManager.getJobManager(project)
                         jobs = listOf()
                         println("The project has been switched to ${project.name}")
+                    }
+                    "upload" -> {
+                        val i = params[1].toInt()
+                        val project = projects[i - 1]
+                        envManager.importProject(lastDownload, project.id)
+                        println("The project has been uploaded in ${project.name} !")
+                    }
+                    "download" -> {
+                        val i = params[1].toInt()
+                        lastDownload = envManager.exportProject(projects[i - 1])
+                        println("The project has been dowloaded ! Resulting JSON :\n$lastDownload")
                     }
                     "datasets" -> {
                         display(jobManager.getDatasets().toList().reversed())
@@ -63,13 +75,13 @@ class InteractiveDemo(private val envManager: EnvironmentManager) : CommandLineR
                     "import" -> {
                         val i = params[1].toInt()
                         val project = projects[i - 1]
-                        jobManager.import(lastImport, project.id)
+                        jobManager.import(lastExport, project.id)
                         println("The job has been imported to ${project.name} !")
                     }
                     "export" -> {
                         val i = params[1].toInt()
-                        lastImport = jobManager.export(jobs[i - 1])
-                        println("The job has been exported ! Resulting JSON :\n$lastImport")
+                        lastExport = jobManager.export(jobs[i - 1])
+                        println("The job has been exported ! Resulting JSON :\n$lastExport")
                     }
                 }
             } catch (exc : Exception) {
