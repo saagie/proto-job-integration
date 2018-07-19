@@ -31,6 +31,14 @@ class Requester(private val securer: Securer = NoSecurer()) {
     )
             = RequestEntity.post(URI(url)).defineHeaders(headers).contentType(mediaType).build()
 
+    fun <T> put(
+            url: String,
+            body: T,
+            headers: Map<String, List<String>> = mapOf(),
+            mediaType: MediaType = MediaType.APPLICATION_JSON
+    )
+            = RequestEntity.put(URI(url)).defineHeaders(headers).contentType(mediaType).body(body)
+
 
     // TOOLS
     /**

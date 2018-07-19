@@ -254,4 +254,126 @@ class RequesterTest {
             assertThat(request.headers[key]).isEqualTo(value)
         }
     }
+
+    @Test
+    fun `'put' method create an appropriate request for a given url`() {
+        // Given
+        val body = "body"
+        val expectedHeaders = mapOf(
+                "Content-Type" to listOf(MediaType.APPLICATION_JSON.toString())
+        )
+
+        // When
+        val request = requester.put(url, body)
+
+        // Then
+        assertThat(request.url).isEqualTo(URI(url))
+        assertThat(request.method).isEqualTo(HttpMethod.PUT)
+        assertThat(request.body).isNotNull()
+        assertThat(request.body).isEqualTo(body)
+
+        expectedHeaders.forEach { (key, value) ->
+            assertThat(request.headers[key]).isEqualTo(value)
+        }
+    }
+
+    @Test
+    fun `'put' method correctly pass all headers given in argument`() {
+        // Given
+        val body = "body"
+        val headers = mapOf(
+                "key1" to listOf("value1"), "key2" to listOf("value2a", "value2b")
+        )
+        val expectedHeaders = headers + ("Content-Type" to listOf(MediaType.APPLICATION_JSON.toString()))
+
+        // When
+        val request = requester.put(url, body, headers)
+
+        // Then
+        assertThat(request.url).isEqualTo(URI(url))
+        assertThat(request.method).isEqualTo(HttpMethod.PUT)
+        assertThat(request.body).isNotNull()
+        assertThat(request.body).isEqualTo(body)
+
+        expectedHeaders.forEach { (key, value) ->
+            assertThat(request.headers[key]).isEqualTo(value)
+        }
+    }
+
+    @Test
+    fun `'put' method correctly pass specific media type`() {
+        // Given
+        val body = "body"
+        val mediaType = MediaType.APPLICATION_PDF
+        val expectedHeaders = mapOf("Content-Type" to listOf(mediaType.toString()))
+
+        // When
+        val request = requester.put(
+                url = url,
+                body = body,
+                mediaType = mediaType
+        )
+
+        // Then
+        assertThat(request.url).isEqualTo(URI(url))
+        assertThat(request.method).isEqualTo(HttpMethod.PUT)
+        assertThat(request.body).isNotNull()
+        assertThat(request.body).isEqualTo(body)
+
+        expectedHeaders.forEach { (key, value) ->
+            assertThat(request.headers[key]).isEqualTo(value)
+        }
+    }
+
+    @Test
+    fun `'put' method with Basic Auth is producing a coherent header`() {
+        // Given
+        val body = "body"
+        val headers = mapOf(
+                "key1" to listOf("value1")
+        )
+        val expectedHeaders = headers + mapOf(
+                "Content-Type" to listOf(MediaType.APPLICATION_JSON.toString()),
+                "Authorization" to listOf("Basic ${encode64("$username:$password")}")
+        )
+
+        // When
+        val request = basicRequester.put(url, body, headers)
+
+        // Then
+        assertThat(request.url).isEqualTo(URI(url))
+        assertThat(request.method).isEqualTo(HttpMethod.PUT)
+        assertThat(request.body).isNotNull()
+        assertThat(request.body).isEqualTo(body)
+
+        expectedHeaders.forEach { (key, value) ->
+            assertThat(request.headers[key]).isEqualTo(value)
+        }
+    }
+
+    @Test
+    fun `'put' method with Token Auth is producing a coherent header`() {
+        // Given
+        val body = "body"
+        val headers = mapOf(
+                "key1" to listOf("value1")
+        )
+        val expectedHeaders = headers + mapOf(
+                "Content-Type" to listOf(MediaType.APPLICATION_JSON.toString()),
+                "Authorization" to listOf("Bearer $token")
+        )
+
+        // When
+        val request = tokenRequester.put(url, body, headers)
+
+        // Then
+        assertThat(request.url).isEqualTo(URI(url))
+        assertThat(request.method).isEqualTo(HttpMethod.PUT)
+        assertThat(request.body).isNotNull()
+        assertThat(request.body).isEqualTo(body)
+
+        expectedHeaders.forEach { (key, value) ->
+            assertThat(request.headers[key]).isEqualTo(value)
+        }
+    }
 }
