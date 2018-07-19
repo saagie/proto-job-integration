@@ -42,10 +42,10 @@ class DataikuJobManager(private val env: DataikuEnvironmentManager, private val 
             transform = { JobStatus.from(it!!.baseStatus.state) }
     )
 
-    override fun start(target: String) = env.restTemplate.process(
+    override fun start(job: Job) = env.restTemplate.process(
             request = env.requester.post(
                     url = "${env.url}/projects/$project/jobs/",
-                    body = StartDTO(arrayOf(OutputDTO(project, target)))
+                    body = StartDTO(arrayOf(OutputDTO(project, job.target)))
             )
     )
 

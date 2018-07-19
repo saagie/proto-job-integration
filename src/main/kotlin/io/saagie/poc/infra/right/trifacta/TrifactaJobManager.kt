@@ -36,10 +36,10 @@ class TrifactaJobManager(private val env:TrifactaEnvironmentManager) : JobManage
             transform = { toStatus(it!!) }
     )
 
-    override fun start(target: String) = env.restTemplate.process(
+    override fun start(job: Job) = env.restTemplate.process(
             request = env.requester.post(
                     url = "${env.url}/jobGroups",
-                    body = RunDTO(IDDTO(target.toIntOrNull()))
+                    body = RunDTO(IDDTO(job.target.toIntOrNull()))
             )
     )
 

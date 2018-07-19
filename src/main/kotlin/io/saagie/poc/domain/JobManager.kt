@@ -9,9 +9,7 @@ interface JobManager {
 
     fun getStatus(job: Job): JobStatus
 
-    fun start(target: String)
-
-    fun start(job: Job) = start(job.target)
+    fun start(job: Job)
 
     fun stop(job: Job)
 

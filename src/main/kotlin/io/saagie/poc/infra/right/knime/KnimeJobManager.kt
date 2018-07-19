@@ -24,7 +24,7 @@ class KnimeJobManager(private val env: KnimeEnvironmentManager, private val proj
 
     @Suppress("UNCHECKED_CAST")
     override fun get(id: String) = env.restTemplate.process(
-            request = env.requester.get<JobDTO>("${env.url}/jobs/${id}/"),
+            request = env.requester.get<JobDTO>("${env.url}/jobs/$id/"),
             verify = { it != null && inProject(it) },
             transform = { toJob(it!!) }
     )
@@ -32,14 +32,12 @@ class KnimeJobManager(private val env: KnimeEnvironmentManager, private val proj
     // Knime doesn't include a specific 'get a Job status' API request.
     override fun getStatus(job: Job) = get(job.id).status
 
-    override fun start(target: String) = env.restTemplate.process(
+    override fun start(job: Job) = env.restTemplate.process(
             request = env.requester.post(
-                url = "${env.url}/jobs/$target/".correctURL(),
+                url = "${env.url}/jobs/${job.id}/".correctURL(),
                 body ="{}"
             )
     )
-
-    override fun start(job: Job) = start(job.id)
 
     // Knime doesn't include a specific 'stop a Job' API request.
     override fun stop(job: Job) = throw UnsupportedOperationException()

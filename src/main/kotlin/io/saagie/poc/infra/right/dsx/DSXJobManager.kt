@@ -26,14 +26,12 @@ class DSXJobManager(private val env: DSXEnvironmentManager, private val project:
             transform = { toStatus(it!!.status) }
     )
 
-    override fun start(target: String) = env.restTemplate.process(
+    override fun start(job: Job) = env.restTemplate.process(
             request = env.requester.post(
                     url = "${env.url}/api/v1/spark/submit",
-                    body = StartDTO(target)
+                    body = StartDTO(job.id)
             )
     )
-
-    override fun start(job: Job) = start(job.id)
 
     override fun stop(job: Job) = env.restTemplate.process(
             request = env.requester.post(
