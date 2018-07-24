@@ -12,7 +12,7 @@ class NifiJobManager(private val env: NifiEnvironmentManager, private val projec
     override fun getDatasets() = listOf<Dataset>()
 
     override fun getAll() = env.restTemplate.process(
-            request = env.requester.get<AllProcessorsDTO>("${env.url}/execute-groups/$project/processors"),
+            request = env.requester.get<AllProcessorsDTO>("${env.url}/process-groups/$project/processors"),
             verify = { it.processors.isNotEmpty() },
             transform = { it.processors.map { it.toJob() }}
     )
@@ -46,7 +46,7 @@ class NifiJobManager(private val env: NifiEnvironmentManager, private val projec
 
     override fun import(jobDescription: String, target: String) = env.restTemplate.execute(
             request = env.requester.post(
-                    url = "${env.url}/execute-groups/$target/processors",
+                    url = "${env.url}/process-groups/$target/processors",
                     body = env.prepareForImport(jobDescription)
             )
     )

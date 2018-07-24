@@ -24,7 +24,7 @@ class NifiEnvironmentManager(val restTemplate: RestTemplate, private val securer
     // METHODS
     override fun getProjects(): Collection<Project> {
         fun getProjectIntels(project: ProjectDTO) = restTemplate.process(
-                request = requester.get<AllProcessGroupDTO>("$url/execute-groups/${project.id}/execute-groups"),
+                request = requester.get<AllProcessGroupDTO>("$url/process-groups/${project.id}/process-groups"),
                 transform = { it.processGroups.map { it.component }.toSet() }
         )
 
