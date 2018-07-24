@@ -5,6 +5,7 @@ import io.saagie.poc.domain.Job
 import io.saagie.poc.domain.JobManager
 import io.saagie.poc.domain.JobStatus
 import io.saagie.poc.infra.right.common.process
+import io.saagie.poc.infra.right.common.execute
 
 
 class DataikuJobManager(private val env: DataikuEnvironmentManager, private val project: String) : JobManager {
@@ -14,11 +15,8 @@ class DataikuJobManager(private val env: DataikuEnvironmentManager, private val 
             request = env.requester.get<Array<DatasetDTO>>(
                     url = "${env.url}/projects/$project/datasets/"
             ),
-            verify = {
-                !(it?.isEmpty() ?: true)
-                && !(it?.any { it.projectKey != project} ?: true)
-            },
-            transform = { it!!.map(::toDataset) }
+            verify = { it.isNotEmpty() && it.all { it.projectKey == project }},
+            transform = { it.map(::toDataset) }
     )
 
     @Suppress("UNCHECKED_CAST")
@@ -26,11 +24,8 @@ class DataikuJobManager(private val env: DataikuEnvironmentManager, private val 
             request = env.requester.get<Array<JobDTO>>(
                     url = "${env.url}/projects/$project/jobs/"
             ),
-            verify = {
-                !(it?.isEmpty() ?: true)
-                && !(it?.any { it.def.projectKey != project } ?: true)
-            },
-            transform = { it!!.map(::toJob) }
+            verify = { it.isNotEmpty() && it.all { it.def.projectKey == project }},
+            transform = { it.map(::toJob) }
     )
 
     @Suppress("UNCHECKED_CAST")
@@ -38,24 +33,24 @@ class DataikuJobManager(private val env: DataikuEnvironmentManager, private val 
             request = env.requester.get<StatusDTO>(
                     url = "${env.url}/projects/$project/jobs/${job.id}/"
             ),
-            verify = { !(it?.baseStatus?.state?.isBlank() ?: true) },
-            transform = { JobStatus.from(it!!.baseStatus.state) }
+            verify = { it.baseStatus.state.isNotBlank() },
+            transform = { JobStatus.from(it.baseStatus.state) }
     )
 
-    override fun start(job: Job) = env.restTemplate.process(
+    override fun start(job: Job) = env.restTemplate.execute(
             request = env.requester.post(
                     url = "${env.url}/projects/$project/jobs/",
                     body = StartDTO(arrayOf(OutputDTO(project, job.target)))
             )
     )
 
-    override fun stop(job: Job) = env.restTemplate.process(
+    override fun stop(job: Job) = env.restTemplate.execute(
             request = env.requester.post(
                     url = "${env.url}/projects/$project/jobs/${job.id}/abort/"
             )
     )
 
-    override fun import(jobDescription: String, target: String) = env.restTemplate.process(
+    override fun import(jobDescription: String, target: String) = env.restTemplate.execute(
             request = env.requester.post(
                     url = "${env.url}/projects/$project/datasets/$target",
                     body = jobDescription
@@ -66,9 +61,7 @@ class DataikuJobManager(private val env: DataikuEnvironmentManager, private val 
     override fun export(job: Job) = env.restTemplate.process(
             request = env.requester.get<String>(
                     url = "${env.url}/projects/$project/datasets/${job.target}"
-            ),
-            verify = { !(it?.isBlank() ?: true) },
-            transform = { it!! }
+            )
     )
 
 
