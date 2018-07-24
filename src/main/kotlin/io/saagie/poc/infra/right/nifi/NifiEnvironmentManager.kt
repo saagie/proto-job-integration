@@ -38,13 +38,13 @@ class NifiEnvironmentManager(val restTemplate: RestTemplate, private val securer
 
     override fun importProject(description: String, target: String) = restTemplate.execute(
             request = requester.post(
-                    url = "$url/execute-groups/$target/execute-groups",
+                    url = "$url/process-groups/$target/process-groups",
                     body = prepareForImport(description)
             )
     )
 
     override fun exportProject(project: Project) = restTemplate.process(
-            request = requester.get<String>("$url/execute-groups/${project.id}")
+            request = requester.get<String>("$url/process-groups/${project.id}")
     )
 
 
