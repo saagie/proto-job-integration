@@ -1,7 +1,10 @@
 package io.saagie.poc.infra.right.common
 
+import io.saagie.poc.infra.AppProperties
+import io.saagie.poc.infra.CommonProperties
 import io.saagie.poc.infra.right.common.securer.BasicSecurer
 import io.saagie.poc.infra.right.common.securer.TokenSecurer
+import io.saagie.poc.infra.right.common.securer.createTokenExtractor
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -19,7 +22,6 @@ import java.net.URI
 class RequesterTest {
     // ATTRIBUTES
     private val url = "http://itsatesturl:8080"
-    private val tokenUrl = "http://itsatesttokenurl:8080"
     private val token = "itsanunpredictabletoken"
     private val username = "admin"
     private val password = "admin"
@@ -28,24 +30,32 @@ class RequesterTest {
     private lateinit var basicRequester: Requester
     private lateinit var tokenRequester: Requester
     private lateinit var restTemplate: RestTemplate
+    private lateinit var appProperties: AppProperties
 
 
     // METHODS
     @Before
     fun before() {
+        // Fake properties to mock
+        appProperties = AppProperties(
+                common = CommonProperties().apply {
+                    username = "admin"
+                    password = "admin"
+                    tokenUrl = "http://itsatesttokenurl:8080"
+                }
+        )
+
+
         // A service to mock token retrieval
         restTemplate = mock(RestTemplate::class.java)
         given(restTemplate.exchange(Mockito.any(), eq(String::class.java))).willReturn(ResponseEntity(token, HttpStatus.OK))
 
 
         // Specific requesters definition
-        basicRequester = Requester(BasicSecurer(username, password))
+        basicRequester = Requester(BasicSecurer(appProperties))
         tokenRequester = Requester(TokenSecurer(
-                username = username,
-                password = password,
-                tokenUrl = tokenUrl,
-                tokenDTO = String::class.java,
-                tokenExtractor = { it },
+                properties = appProperties,
+                extractor = String::class.java.createTokenExtractor { it },
                 restTemplate = restTemplate
         ))
     }
