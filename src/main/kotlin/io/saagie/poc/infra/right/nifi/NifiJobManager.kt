@@ -5,27 +5,27 @@ import io.saagie.poc.domain.Job
 import io.saagie.poc.domain.JobManager
 import io.saagie.poc.domain.JobStatus
 import io.saagie.poc.infra.right.common.process
+import io.saagie.poc.infra.right.common.execute
 
 class NifiJobManager(private val env: NifiEnvironmentManager, private val project: String) : JobManager {
     // METHODS
     override fun getDatasets() = listOf<Dataset>()
 
     override fun getAll() = env.restTemplate.process(
-            request = env.requester.get<AllProcessorsDTO>("${env.url}/process-groups/$project/processors"),
-            verify = { it?.processors?.isNotEmpty() ?: false},
-            transform = { it!!.processors.map { it.toJob() }}
+            request = env.requester.get<AllProcessorsDTO>("${env.url}/execute-groups/$project/processors"),
+            verify = { it.processors.isNotEmpty() },
+            transform = { it.processors.map { it.toJob() }}
     )
 
     override fun get(id: String) = env.restTemplate.process(
             request = env.requester.get<JobDTO>("${env.url}/processors/$id"),
-            verify = { it != null },
-            transform = { it!!.toJob() }
+            transform = { it.toJob() }
     )
 
     override fun getStatus(job: Job) = get(job.id).status
 
     override fun start(job: Job) {
-        env.restTemplate.process(
+        env.restTemplate.execute(
                 request = env.requester.put(
                         url = "${env.url}/processors/${job.id}",
                         body = StartStopJobDTO(job, "RUNNING")
@@ -35,7 +35,7 @@ class NifiJobManager(private val env: NifiEnvironmentManager, private val projec
     }
 
     override fun stop(job: Job) {
-        env.restTemplate.process(
+        env.restTemplate.execute(
                 request = env.requester.put(
                         url = "${env.url}/processors/${job.id}",
                         body = StartStopJobDTO(job, "STOPPED")
@@ -44,17 +44,15 @@ class NifiJobManager(private val env: NifiEnvironmentManager, private val projec
         job.updates += 1
     }
 
-    override fun import(jobDescription: String, target: String) = env.restTemplate.process(
+    override fun import(jobDescription: String, target: String) = env.restTemplate.execute(
             request = env.requester.post(
-                    url = "${env.url}/process-groups/$target/processors",
+                    url = "${env.url}/execute-groups/$target/processors",
                     body = env.prepareForImport(jobDescription)
             )
     )
 
     override fun export(job: Job) = env.restTemplate.process(
-            request = env.requester.get<String>("${env.url}/processors/${job.id}"),
-            verify = { it != null },
-            transform = { it!! }
+            request = env.requester.get<String>("${env.url}/processors/${job.id}")
     )
 
 
