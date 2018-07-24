@@ -7,7 +7,7 @@ import io.saagie.poc.infra.AppProperties
 import io.saagie.poc.infra.right.common.Requester
 import io.saagie.poc.infra.right.common.backtrackSearch
 import io.saagie.poc.infra.right.common.process
-import io.saagie.poc.infra.right.common.securer.BasicSecurer
+import io.saagie.poc.infra.right.common.securer.Securer
 import io.saagie.poc.infra.right.common.correctURL
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
@@ -15,12 +15,10 @@ import org.springframework.web.client.RestTemplate
 
 @Component
 @Profile("knime")
-class KnimeEnvironmentManager(val restTemplate: RestTemplate, private val properties: AppProperties) : EnvironmentManager {
+class KnimeEnvironmentManager(val restTemplate: RestTemplate, private val securer: Securer, private val properties: AppProperties) : EnvironmentManager {
     // ATTRIBUTES
     internal val url = properties.knime.url
-    internal val requester = Requester(
-            BasicSecurer(properties.knime.username, properties.knime.password)
-    )
+    internal val requester = Requester(securer)
 
 
     // METHODS

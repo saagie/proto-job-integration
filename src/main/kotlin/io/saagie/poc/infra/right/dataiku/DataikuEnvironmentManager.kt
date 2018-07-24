@@ -6,21 +6,21 @@ import io.saagie.poc.domain.Project
 import io.saagie.poc.infra.AppProperties
 import io.saagie.poc.infra.right.common.Requester
 import io.saagie.poc.infra.right.common.process
-import io.saagie.poc.infra.right.common.securer.BasicSecurer
+import io.saagie.poc.infra.right.common.securer.Securer
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 
 @Component
 @Profile("dataiku")
-class DataikuEnvironmentManager(val restTemplate: RestTemplate, private val properties: AppProperties) : EnvironmentManager {
+class DataikuEnvironmentManager(val restTemplate: RestTemplate, private val securer: Securer, private val properties: AppProperties) : EnvironmentManager {
     // ATTRIBUTES
     internal val url = properties.dataiku.url
 
     /**
      * Dataiku is using basic auth, with a simple apikey as username and no password.
      */
-    internal val requester = Requester(BasicSecurer(properties.dataiku.apikey))
+    internal val requester = Requester(securer)
 
 
     // METHODS

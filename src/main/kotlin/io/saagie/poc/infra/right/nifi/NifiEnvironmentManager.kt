@@ -5,6 +5,7 @@ import io.saagie.poc.domain.JobManager
 import io.saagie.poc.domain.Project
 import io.saagie.poc.infra.AppProperties
 import io.saagie.poc.infra.right.common.Requester
+import io.saagie.poc.infra.right.common.securer.Securer
 import io.saagie.poc.infra.right.common.backtrackSearch
 import io.saagie.poc.infra.right.common.process
 import org.springframework.context.annotation.Profile
@@ -13,10 +14,10 @@ import org.springframework.web.client.RestTemplate
 
 @Component
 @Profile("nifi")
-class NifiEnvironmentManager(val restTemplate: RestTemplate, private val properties: AppProperties): EnvironmentManager {
+class NifiEnvironmentManager(val restTemplate: RestTemplate, private val securer: Securer, private val properties: AppProperties): EnvironmentManager {
     // ATTRIBUTES
     internal val url = properties.nifi.url
-    internal val requester = Requester()
+    internal val requester = Requester(securer)
 
 
     // METHODS
