@@ -1,9 +1,13 @@
 package io.saagie.poc.infra.right.common.securer
 
+import io.saagie.poc.infra.AppProperties
 import io.saagie.poc.infra.right.common.encode64
+import org.springframework.context.annotation.Profile
+import org.springframework.stereotype.Component
 
-
-class BasicSecurer(private val username: String, private val password: String = ""): AbstractSecurer() {
+@Component
+@Profile("basic")
+class BasicSecurer(private val properties: AppProperties): AbstractSecurer() {
     // METHOD
-    override fun getAuthorization(): String = "Basic ${encode64("$username:$password")}"
+    override fun getAuthorization() = "Basic ${encode64("${properties.common.username}:${properties.common.password}")}"
 }

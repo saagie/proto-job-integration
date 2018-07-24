@@ -1,21 +1,14 @@
 dataiku:
   url: ${DATAIKU_ADAPTER_URL}/public/api
-  apikey: ${DATAIKU_ADAPTER_KEY}
 
 knime:
   url: ${KNIME_ADAPTER_URL}/rest/v4
-  username: ${KNIME_ADAPTER_USERNAME}
-  password: ${KNIME_ADAPTER_PASSWORD}
 
 trifacta:
   url: ${TRIFACTA_ADAPTER_URL}/v3
-  username: ${TRIFACTA_ADAPTER_USERNAME}
-  password: ${TRIFACTA_ADAPTER_PASSWORD}
 
 dsx:
   url: ${DSX_ADAPTER_URL}
-  username: ${DSX_ADAPTER_USERNAME}
-  password: ${DSX_ADAPTER_PASSWORD}
 
 nifi:
   url: ${NIFI_ADAPTER_URL}
@@ -23,12 +16,13 @@ nifi:
 common:
   username: ${JOBMANAGER_USERNAME}
   password: ${JOBMANAGER_PASSWORD}
+  tokenUrl: ${JOBMANAGER_TOKEN_URL}
   project: ${JOBMANAGER_PROJECT}
   job: ${JOBMANAGER_JOB}
 
 spring:
   profiles:
-    active: knime,demo
+    active: nifi,demo,none
 
 server:
   port: 8081
