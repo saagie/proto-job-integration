@@ -4,6 +4,7 @@ import io.saagie.poc.domain.Dataset
 import io.saagie.poc.domain.Job
 import io.saagie.poc.domain.JobManager
 import io.saagie.poc.domain.JobStatus
+import io.saagie.poc.infra.right.common.execute
 import io.saagie.poc.infra.right.common.process
 
 
@@ -12,31 +13,30 @@ class TrifactaJobManager(private val env:TrifactaEnvironmentManager) : JobManage
     @Suppress("UNCHECKED_CAST")
     override fun getDatasets() = env.restTemplate.process(
             request = env.requester.get<DatasetsDTO>("${env.url}/wrangledDatasets"),
-            verify = { !(it?.data?.isEmpty() ?: true) },
-            transform = { it!!.data.map(::toDataset) }
+            verify = { it.data.isNotEmpty() },
+            transform = { it.data.map(::toDataset) }
     )
 
     @Suppress("UNCHECKED_CAST")
     override fun getAll() = env.restTemplate.process(
             request = env.requester.get<JobsDTO>("${env.url}/jobGroups"),
-            verify = { !(it?.data?.isEmpty() ?: true) },
-            transform = { it!!.data.map(::toJob) }
+            verify = { it.data.isNotEmpty() },
+            transform = { it.data.map(::toJob) }
     )
 
     @Suppress("UNCHECKED_CAST")
     override fun get(id: String) = env.restTemplate.process(
             request = env.requester.get<JobDTO>("${env.url}/jobGroups/$id"),
-            verify = { it != null },
-            transform = { toJob(it!!) }
+            transform = ::toJob
     )
 
     @Suppress("UNCHECKED_CAST")
     override fun getStatus(job: Job) = env.restTemplate.process(
             request = env.requester.get<String>("${env.url}/jobGroups/${job.id}/status"),
-            transform = { toStatus(it!!) }
+            transform = ::toStatus
     )
 
-    override fun start(job: Job) = env.restTemplate.process(
+    override fun start(job: Job) = env.restTemplate.execute(
             request = env.requester.post(
                     url = "${env.url}/jobGroups",
                     body = RunDTO(IDDTO(job.target.toIntOrNull()))
@@ -47,7 +47,7 @@ class TrifactaJobManager(private val env:TrifactaEnvironmentManager) : JobManage
             throw UnsupportedOperationException()
     }
 
-    override fun import(jobDescription: String, target: String) = env.restTemplate.process(
+    override fun import(jobDescription: String, target: String) = env.restTemplate.execute(
             request = env.requester.post(
                     url = "${env.url}/wrangledDatasets/",
                     body = jobDescription
@@ -56,9 +56,7 @@ class TrifactaJobManager(private val env:TrifactaEnvironmentManager) : JobManage
 
     @Suppress("UNCHECKED_CAST")
     override fun export(job: Job) = env.restTemplate.process(
-        request = env.requester.get<String>("${env.url}/wrangledDatasets/${job.id}"),
-        verify = { it != null },
-        transform = { it!! }
+        request = env.requester.get<String>("${env.url}/wrangledDatasets/${job.id}")
     )
 
 

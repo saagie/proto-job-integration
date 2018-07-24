@@ -5,10 +5,8 @@ import io.saagie.poc.domain.JobManager
 import io.saagie.poc.domain.Project
 import io.saagie.poc.infra.AppProperties
 import io.saagie.poc.infra.right.common.Requester
-import io.saagie.poc.infra.right.common.securer.BasicSecurer
 import io.saagie.poc.infra.right.common.securer.Securer
 import io.saagie.poc.infra.right.trifacta.TrifactaEnvironmentManager.companion.DEFAULT_PROJECT_NAME
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
