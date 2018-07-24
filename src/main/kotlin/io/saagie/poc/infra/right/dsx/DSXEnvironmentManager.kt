@@ -22,9 +22,9 @@ class DSXEnvironmentManager(val restTemplate: RestTemplate, private val securer:
     // METHODS
     @Suppress("UNCHECKED_CAST")
     override fun getProjects() = restTemplate.process(
-            request = requester.get<Array<String>>("${url}/api/v2/filemgmt/view/"),
-            verify = { !(it?.isEmpty() ?: true) },
-            transform = { it!!.filter { it.reversed().startsWith("/") }.map(::Project)}
+            request = requester.get("${url}/api/v2/filemgmt/view/"),
+            verify = Array<String>::isNotEmpty,
+            transform = { it.filter { it.reversed().startsWith("/") }.map(::Project)}
     )
 
     override fun getJobManager(project: Project?): JobManager = DSXJobManager(this, project!!.id)
