@@ -95,11 +95,18 @@ To modify the profile at launch, you should use a command like :
   
 3) *(Optional, if specified at launch)* Change the current app's action by changing the `Active profiles` attribute.  
   
-4) Update your environment varaibles as needed by your app in the `Override parameters` menu.   
-*Most of the time,you'll only need to change the service's URL and define your credentials   
-(Please check the `src/main/resources/application.yml` for the exact syntax).*  
+4) Update your environment varaibles as needed by your app in the `Override parameters` menu. :
+- a) 
+*Most of the time,you'll only need to change the service's URL 
+(Please check the `src/main/resources/application.yml` for the exact syntax).*
+
+- b) Select with a profile argument (`spring.profile.active`), which kind of security to use :
+    - `none` : No security, I hope you know what you're doing :)
+    - `basic` : You'll have to inform your username and password under the `common` section of the `application.yml`
+    - `token` : You'll have to inform your URL under the `common` section of the `application.yml`,
+and eventually your (username, password) if the token's request is secured with basic auth.
   
-5) Run it through your IDE  
+5) Run it through your IDE.
   
 **Build and run**
 
