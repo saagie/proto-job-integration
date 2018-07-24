@@ -9,6 +9,7 @@ data class AppProperties(
         val trifacta: URLProperty = URLProperty(),
         val dsx: URLProperty = URLProperty(),
         val nifi: URLProperty = URLProperty(),
+        val glue: URLProperty = URLProperty(),
         val common: CommonProperties = CommonProperties()
 )
 

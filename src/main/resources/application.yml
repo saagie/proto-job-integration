@@ -13,6 +13,9 @@ dsx:
 nifi:
   url: ${NIFI_ADAPTER_URL}
 
+glue:
+  url: ${GLUE_ADAPTER_URL}
+
 common:
   username: ${JOBMANAGER_USERNAME}
   password: ${JOBMANAGER_PASSWORD}
