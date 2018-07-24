@@ -4,7 +4,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.RequestEntity
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.server.ResponseStatusException
-import java.net.URLEncoder
 import java.util.*
 
 /**
@@ -37,8 +36,8 @@ fun <T> backtrackSearch(initial: T, operation: (T) -> Set<T>): Set<T> =
 fun <T, R> RestTemplate.process(
         request: RequestEntity<T>,
         returnType: Class<T>,
-        transform: (T?) -> R,
-        verify: (T?) -> Boolean = { true }
+        verify: (T) -> Boolean = { true },
+        transform: (T) -> R
 ) : R {
     // Processing request
     val response = this.exchange(request, returnType)
@@ -47,23 +46,28 @@ fun <T, R> RestTemplate.process(
     if (!response.statusCode.is2xxSuccessful) {
         throw ResponseStatusException(response.statusCode)
     }
-    if (!verify(response.body)) {
+    if (response.body == null || !verify(response.body!!)) {
         throw ResponseStatusException(HttpStatus.NO_CONTENT)
     }
 
     // Creating expected result
-    return transform(response.body)
+    return transform(response.body!!)
 }
 
 inline fun <reified T, R> RestTemplate.process(
         request: RequestEntity<T>,
-        noinline transform: (T?) -> R,
-        noinline verify: (T?) -> Boolean = { true }
-) = this.process(request, T::class.java, transform, verify)
+        noinline verify: (T) -> Boolean = { true },
+        noinline transform: (T) -> R
+) = this.process(request, T::class.java, verify, transform)
+
+inline fun <reified T> RestTemplate.process(
+        request: RequestEntity<T>,
+        noinline verify: (T) -> Boolean = { true }
+) = this.process(request, verify) { it }
 
 /**
  * Process the incoming request without any transformation on the response's body.
  * (Pretty useful for POST, PUT, DELETE methods...)
  */
-inline fun <reified T> RestTemplate.process(request: RequestEntity<T>, noinline verify: (T?) -> Boolean = { true })
-        = this.process(request, {}, verify)
+inline fun <reified T> RestTemplate.execute(request: RequestEntity<T>, noinline verify: (T) -> Boolean = { true })
+        = this.process(request, verify) {}
