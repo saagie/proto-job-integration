@@ -4,7 +4,13 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.RequestEntity
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.server.ResponseStatusException
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
+import java.text.SimpleDateFormat
 import java.util.*
+import javax.crypto.Mac
+import javax.crypto.spec.SecretKeySpec
 
 /**
  * Encode a given text into a Base64 String
@@ -13,10 +19,12 @@ fun encode64(txt: String) = String(
         Base64.getEncoder().encode(txt.toByteArray())
 )
 
+fun List<String>.concat(separator: String = "") = this.fold("") { acc, s -> "$acc$s$separator"}.removeSuffix(separator)
+
 /**
  * Transforms a sentence into an URL-ready String.
  */
-fun String.correctURL() = this.replace(" ", "%20")
+fun String.correctURL(): String = URLEncoder.encode(this, "UTF-8")
 
 
 /**
@@ -71,3 +79,26 @@ inline fun <reified T> RestTemplate.process(
  */
 inline fun <reified T> RestTemplate.execute(request: RequestEntity<T>, noinline verify: (T) -> Boolean = { true })
         = this.process(request, verify) {}
+
+/**
+ * Converts a String or ByteArray into an hexadecimal character string.
+ */
+fun ByteArray.toHexa() = this.toTypedArray().fold(Formatter()) { formatter, byte ->  formatter.format("%02x", byte) }.toString()
+fun String.toHexa() = this.toByteArray().toHexa()
+
+/**
+ * Encode a given String using a UTF-8 charset.
+ */
+fun String.encodeUTF8() = String(this.toByteArray(StandardCharsets.UTF_8))
+fun String.getBytes() = this.toByteArray(StandardCharsets.UTF_8)
+
+
+fun String.hash(algorithm: String = "SHA-256") = MessageDigest.getInstance(algorithm).digest(this.getBytes()).toHexa()
+fun String.sign(key: ByteArray, algorithm: String = "HmacSHA256"): ByteArray {
+    val mac = Mac.getInstance(algorithm)
+    mac.init(SecretKeySpec(key, algorithm))
+    return mac.doFinal(this.getBytes())
+}
+
+fun Date.toSimpleFormat() = SimpleDateFormat("yyyyMMdd").format(this)
+fun Date.toFullFormat() = SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'").format(this)
