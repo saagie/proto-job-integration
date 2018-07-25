@@ -16,6 +16,14 @@ nifi:
 glue:
   url: ${GLUE_ADAPTER_URL}
 
+aws:
+  service: ${AWS_SERVICE}
+  region: ${AWS_REGION}
+  publicKey: ${AWS_PUBLIC_KEY}
+  secretKey: ${AWS_SECRET_KEY}
+  url: http://${aws.service}.${aws.region}.amazonaws.com
+  algorithm: AWS4-HMAC-SHA256
+
 common:
   username: ${JOBMANAGER_USERNAME}
   password: ${JOBMANAGER_PASSWORD}

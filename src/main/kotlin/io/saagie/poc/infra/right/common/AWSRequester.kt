@@ -1,44 +1,65 @@
 package io.saagie.poc.infra.right.common
 
-import io.saagie.poc.infra.right.common.securer.NoSecurer
+import io.saagie.poc.infra.AppProperties
 import org.springframework.http.HttpMethod
 import org.springframework.http.RequestEntity
 import org.springframework.util.LinkedMultiValueMap
 import java.net.URI
 import java.util.*
 
-class AWSRequester(
-        val baseUrl: String = "https://glue.us-east-1.amazonaws.com"
-) {
+class AWSRequester(private val appProperties: AppProperties) {
     // ATTRIBUTES
-    var requester = Requester(NoSecurer())
-    /**
-     * Date retrieval (Needs to be 2 hours less than as retrieved...)
-     */
-    var date = Date(Date().time.minus(7200000L))
-
     // -- Request related
-    var method = "POST"
-    var service = "glue"
-    var region = "us-east-1"
+    var service = appProperties.aws.service
+    var region = appProperties.aws.region
     var host = "$service.$region.amazonaws.com"
     var canonicalUri = "/"
-    var requestParameters = ""
-    var endpoint = "$baseUrl$canonicalUri?$requestParameters"
     var contentType = "application/x-amz-json-1.1"
     var signedHeaders = "content-type;host;x-amz-date;x-amz-target"
-    var body = "{}"
 
     // -- Credentials related
-    var algorithm = "AWS4-HMAC-SHA256"
-    var publicKey = "AKIAJUEB6C3GIVV3EESA"
-    var secretKey = "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"
-    var aws = "aws4_request"
+    var algorithm = appProperties.aws.algorithm
+    var publicKey = appProperties.aws.publicKey
+    var secretKey = appProperties.aws.secretKey
+    private val aws = "aws4_request"
 
 
     // METHOD
-    fun <T> createRequest(target: String): RequestEntity<T> {
-        // Creating signature
+    fun <T> get(target: String, body: String = "", requestParameters: String = "") = createRequest<T>("GET", target, body, requestParameters)
+    fun <T> post(target: String, body: String = "{}", requestParameters: String = "") = createRequest<T>("POST", target, body, requestParameters)
+
+    fun <T> createRequest(method: String, target: String, body: String = "", requestParameters: String = ""): RequestEntity<T> {
+        val date = Date(Date().time.minus(7200000L))
+
+        // AWS signature with IAM - Step 1 (cf. Webdoc.)
+        fun createCanonicalRequest(date: Date, target: String) = listOf(
+                method,
+                canonicalUri,
+                requestParameters,
+                "content-type:$contentType\nhost:$host\nx-amz-date:${date.toFullFormat()}\nx-amz-target:$target\n",
+                signedHeaders,
+                body.hash()
+        ).concat("\n")
+
+        // AWS signature with IAM - Step 2
+        fun createStringToSign(date: Date, target: String) = listOf(
+                algorithm,
+                date.toFullFormat(),
+                "${date.toSimpleFormat()}/$region/$service/$aws",
+                createCanonicalRequest(date, target).hash()
+        ).concat("\n")
+
+        // AWS signature with IAM - Step 3
+        fun createSigningKey(date: Date, privateKey: String) = listOf(
+                date.toSimpleFormat(),
+                region,
+                service,
+                aws
+        ).fold("AWS4$privateKey".getBytes()) {
+            key, term -> term.sign(key)
+        }
+
+        // AWS signature with IAM - Step 4
         val signature = createStringToSign(date, target).sign(createSigningKey(date, secretKey)).toHexa()
         val credentialScope = listOf(date.toSimpleFormat(), region, service, aws).concat("/")
 
@@ -54,46 +75,24 @@ class AWSRequester(
         }
 
         // Returning associated request
-        return RequestEntity(headers, HttpMethod.resolve(method)!!, URI(endpoint))
+        return RequestEntity(
+                headers,
+                HttpMethod.resolve(method)!!,
+                URI("${appProperties.aws.url}$canonicalUri?$requestParameters")
+        )
     }
-
-
-    // TOOLS
-    // AWS signature with IAM - Step 1
-    fun createCanonicalRequest(date: Date, target: String) = listOf(
-            method,
-            canonicalUri,
-            requestParameters,
-            "content-type:$contentType\nhost:$host\nx-amz-date:${date.toFullFormat()}\nx-amz-target:$target\n",
-            signedHeaders,
-            body.hash()
-    ).concat("\n")
-
-    // AWS signature with IAM - Step 2
-    fun createStringToSign(date: Date, target: String) = listOf(
-            algorithm,
-            date.toFullFormat(),
-            "${date.toSimpleFormat()}/$region/$service/$aws",
-            createCanonicalRequest(date, target).hash()
-    ).concat("\n")
-
-    // AWS signature with IAM - Step 3
-    fun createSigningKey(date: Date, privateKey: String) = listOf(
-            date.toSimpleFormat(),
-            region,
-            service,
-            aws
-        ).fold("AWS4$privateKey".getBytes()) {
-            key, term -> term.sign(key)
-        }
 }
 
 fun main(args: Array<String>) {
-    var requester = AWSRequester()
-    var request = requester.createRequest<String>("AWSGlue.GetJobs")
+    var requester = AWSRequester(AppProperties())
+    requester.post<String>("AWSGlue.GetJobs").headers.forEach {
+        (key, values) -> println("$key: $values")
+    }
+    println("\n---------\n")
 
-    request.headers.forEach { (key, values) ->
-        println("$key: $values")
+
+    requester.post<String>(target = "AWSGlue.GetJob", body = "{\"JobName\":\"Flights Conversion\"}").headers.forEach {
+        (key, values) -> println("$key: $values")
     }
     println("\n---------\n")
 
