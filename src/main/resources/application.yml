@@ -21,7 +21,7 @@ aws:
   region: ${AWS_REGION}
   publicKey: ${AWS_PUBLIC_KEY}
   secretKey: ${AWS_SECRET_KEY}
-  url: http://${aws.service}.${aws.region}.amazonaws.com
+  url: ${AWS_URL}
   algorithm: AWS4-HMAC-SHA256
 
 common:

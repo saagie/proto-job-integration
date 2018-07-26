@@ -10,25 +10,35 @@ import java.util.*
 class AWSRequester(private val appProperties: AppProperties) {
     // ATTRIBUTES
     // -- Request related
-    var service = appProperties.aws.service
-    var region = appProperties.aws.region
-    var host = "$service.$region.amazonaws.com"
-    var canonicalUri = "/"
-    var contentType = "application/x-amz-json-1.1"
-    var signedHeaders = "content-type;host;x-amz-date;x-amz-target"
+    private val service = appProperties.aws.service
+    private val region = appProperties.aws.region
+    private val host = "$service.$region.amazonaws.com"
+    private val canonicalUri = "/"
+    private val contentType = "application/x-amz-json-1.1"
+    private val signedHeaders = "content-type;host;x-amz-date;x-amz-target"
 
     // -- Credentials related
-    var algorithm = appProperties.aws.algorithm
-    var publicKey = appProperties.aws.publicKey
-    var secretKey = appProperties.aws.secretKey
+    private val algorithm = appProperties.aws.algorithm
+    private val publicKey = appProperties.aws.publicKey
+    private val secretKey = appProperties.aws.secretKey
     private val aws = "aws4_request"
 
 
     // METHOD
-    fun <T> get(target: String, body: String = "", requestParameters: String = "") = createRequest<T>("GET", target, body, requestParameters)
-    fun <T> post(target: String, body: String = "{}", requestParameters: String = "") = createRequest<T>("POST", target, body, requestParameters)
+    fun get(target: String, requestParameters: String = "") = createRequest(
+            method = "GET",
+            target = target,
+            requestParameters = requestParameters
+    )
 
-    fun <T> createRequest(method: String, target: String, body: String = "", requestParameters: String = ""): RequestEntity<T> {
+    fun post(target: String, body: String = "{}", requestParameters: String = "") = createRequest(
+            method = "POST",
+            target = target,
+            body = body,
+            requestParameters = requestParameters
+    )
+
+    private fun createRequest(method: String, target: String, body: String = "", requestParameters: String = ""): RequestEntity<String> {
         val date = Date(Date().time.minus(7200000L))
 
         // AWS signature with IAM - Step 1 (cf. Webdoc.)
@@ -76,59 +86,12 @@ class AWSRequester(private val appProperties: AppProperties) {
 
         // Returning associated request
         return RequestEntity(
+                body,
                 headers,
                 HttpMethod.resolve(method)!!,
                 URI("${appProperties.aws.url}$canonicalUri?$requestParameters")
         )
     }
-}
-
-fun main(args: Array<String>) {
-    var requester = AWSRequester(AppProperties())
-    requester.post<String>("AWSGlue.GetJobs").headers.forEach {
-        (key, values) -> println("$key: $values")
-    }
-    println("\n---------\n")
-
-
-    requester.post<String>(target = "AWSGlue.GetJob", body = "{\"JobName\":\"Flights Conversion\"}").headers.forEach {
-        (key, values) -> println("$key: $values")
-    }
-    println("\n---------\n")
-
-//    requester = AWSRequester().apply {
-//        method = "GET"
-//        service = "iam"
-//        host = "iam.amazonaws.com"
-//        requestParameters = "Action=ListUsers&Version=2010-05-08"
-//        contentType = "application/x-www-form-urlencoded; charset=utf-8"
-//        signedHeaders = "content-type;host;x-amz-date"
-//        body = ""
-//        date = Date(Date.UTC(115, 7, 30, 10, 36, 0))
-//
-//        publicKey = "AKIDEXAMPLE"
-//        secretKey = "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY"
-//    }
-//
-//    val dateExemple = Date(Date.UTC(115, 7, 30, 10, 36, 0))
-//    val txt = requester.createCanonicalRequest(dateExemple, "AWSGlue.GetJobs")
-//    println("$txt\n${txt.hashSHA256()}")
-//    println("\n---------\n")
-//
-//    val txt2 = requester.createStringToSign(dateExemple, "")
-//    println(txt2)
-//    println("\n---------\n")
-//
-//    val txt3 = requester.createSigningKey(dateExemple, "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY")
-//    println(txt3.toHexa())
-//    println("\n---------\n")
-//
-//    val signature = txt2.sign(txt3)
-//    println(signature.toHexa())
-//    println("\n---------\n")
-//
-//    request = requester.createRequest<String>("AWSGlue.GetJobs")
-//    request.headers.forEach { (key, values) -> println("$key: $values") }
 }
 
 

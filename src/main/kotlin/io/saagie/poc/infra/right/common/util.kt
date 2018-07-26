@@ -1,5 +1,6 @@
 package io.saagie.poc.infra.right.common
 
+import com.google.gson.Gson
 import org.springframework.http.HttpStatus
 import org.springframework.http.RequestEntity
 import org.springframework.web.client.RestTemplate
@@ -20,6 +21,9 @@ fun encode64(txt: String) = String(
 )
 
 fun List<String>.concat(separator: String = "") = this.fold("") { acc, s -> "$acc$s$separator"}.removeSuffix(separator)
+
+fun <T> Class<T>.fromJSON(json: String): T = Gson().fromJson(json, this)
+fun <T> T.toJSON(): String = Gson().toJson(this)
 
 /**
  * Transforms a sentence into an URL-ready String.
@@ -84,12 +88,10 @@ inline fun <reified T> RestTemplate.execute(request: RequestEntity<T>, noinline 
  * Converts a String or ByteArray into an hexadecimal character string.
  */
 fun ByteArray.toHexa() = this.toTypedArray().fold(Formatter()) { formatter, byte ->  formatter.format("%02x", byte) }.toString()
-fun String.toHexa() = this.toByteArray().toHexa()
 
 /**
  * Encode a given String using a UTF-8 charset.
  */
-fun String.encodeUTF8() = String(this.toByteArray(StandardCharsets.UTF_8))
 fun String.getBytes() = this.toByteArray(StandardCharsets.UTF_8)
 
 
@@ -100,5 +102,5 @@ fun String.sign(key: ByteArray, algorithm: String = "HmacSHA256"): ByteArray {
     return mac.doFinal(this.getBytes())
 }
 
-fun Date.toSimpleFormat() = SimpleDateFormat("yyyyMMdd").format(this)
-fun Date.toFullFormat() = SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'").format(this)
+fun Date.toSimpleFormat(): String = SimpleDateFormat("yyyyMMdd").format(this)
+fun Date.toFullFormat(): String = SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'").format(this)
