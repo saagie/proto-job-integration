@@ -5,7 +5,7 @@
 
     <groupId>io.saagie</groupId>
     <artifactId>jobmanager</artifactId>
-    <version>5.0-SNAPSHOT</version>
+    <version>6.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>jobmanager</name>
