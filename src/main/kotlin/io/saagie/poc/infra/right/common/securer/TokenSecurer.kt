@@ -1,29 +1,29 @@
 package io.saagie.poc.infra.right.common.securer
 
+import io.saagie.poc.infra.AppProperties
 import io.saagie.poc.infra.right.common.Requester
 import io.saagie.poc.infra.right.common.process
+import org.springframework.context.annotation.Profile
+import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 
-open class TokenSecurer<T>(
-        private val username: String,
-        private val password: String,
-        private val tokenUrl: String,
-        private val tokenDTO: Class<T>,
-        private val tokenExtractor: (T) -> String,
+@Component
+@Profile("token")
+class TokenSecurer(
+        private val properties: AppProperties,
+        private val extractor: TokenExtractor,
         private val restTemplate: RestTemplate
 ): AbstractSecurer() {
-    // ATTRIBUTE
-    private val requester = Requester(BasicSecurer(username, password))
+    // ATTRIBUTES
+    private val requester = Requester(BasicSecurer(properties))
 
     // METHOD
-    override fun getAuthorization(): String {
-        val token = restTemplate.process(
-                request = requester.get(tokenUrl),
-                returnType = tokenDTO,
+    override fun getAuthorization() = "Bearer ${
+        restTemplate.process(
+                request = requester.get(properties.common.tokenUrl),
+                returnType = extractor.tokenClass(),
                 verify = { it != null },
-                transform = { tokenExtractor(it!!) }
+                transform = { extractor.action()(it!!) }
         )
-
-        return "Bearer $token"
-    }
+    }"
 }

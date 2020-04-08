@@ -6,21 +6,19 @@ import io.saagie.poc.domain.Project
 import io.saagie.poc.infra.AppProperties
 import io.saagie.poc.infra.right.common.Requester
 import io.saagie.poc.infra.right.common.backtrackSearch
-import io.saagie.poc.infra.right.common.process
-import io.saagie.poc.infra.right.common.securer.BasicSecurer
 import io.saagie.poc.infra.right.common.correctURL
+import io.saagie.poc.infra.right.common.process
+import io.saagie.poc.infra.right.common.securer.Securer
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 
 @Component
 @Profile("knime")
-class KnimeEnvironmentManager(val restTemplate: RestTemplate, private val properties: AppProperties) : EnvironmentManager {
+class KnimeEnvironmentManager(val restTemplate: RestTemplate, private val securer: Securer, private val properties: AppProperties) : EnvironmentManager {
     // ATTRIBUTES
     internal val url = properties.knime.url
-    internal val requester = Requester(
-            BasicSecurer(properties.knime.username, properties.knime.password)
-    )
+    internal val requester = Requester(securer)
 
 
     // METHODS
@@ -29,8 +27,7 @@ class KnimeEnvironmentManager(val restTemplate: RestTemplate, private val proper
         // Making the request to the KNIME API
         fun getProjectInfos(name: String) = restTemplate.process(
                 request = requester.get<RepositoryDTO>("$url/repository$name".correctURL()),
-                verify = { it != null },
-                transform = { it!!.children }
+                transform = { it.children }
         )
 
         // Researching all project with a backtracking algortihm.

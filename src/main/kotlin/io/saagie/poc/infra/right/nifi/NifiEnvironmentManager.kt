@@ -5,26 +5,27 @@ import io.saagie.poc.domain.JobManager
 import io.saagie.poc.domain.Project
 import io.saagie.poc.infra.AppProperties
 import io.saagie.poc.infra.right.common.Requester
+import io.saagie.poc.infra.right.common.securer.Securer
 import io.saagie.poc.infra.right.common.backtrackSearch
 import io.saagie.poc.infra.right.common.process
+import io.saagie.poc.infra.right.common.execute
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 
 @Component
 @Profile("nifi")
-class NifiEnvironmentManager(val restTemplate: RestTemplate, private val properties: AppProperties): EnvironmentManager {
+class NifiEnvironmentManager(val restTemplate: RestTemplate, private val securer: Securer, private val properties: AppProperties): EnvironmentManager {
     // ATTRIBUTES
     internal val url = properties.nifi.url
-    internal val requester = Requester()
+    internal val requester = Requester(securer)
 
 
     // METHODS
     override fun getProjects(): Collection<Project> {
         fun getProjectIntels(project: ProjectDTO) = restTemplate.process(
                 request = requester.get<AllProcessGroupDTO>("$url/process-groups/${project.id}/process-groups"),
-                verify = { it != null },
-                transform = { it!!.processGroups.map { it.component }.toSet() }
+                transform = { it.processGroups.map { it.component }.toSet() }
         )
 
         return backtrackSearch(
@@ -35,7 +36,7 @@ class NifiEnvironmentManager(val restTemplate: RestTemplate, private val propert
 
     override fun getJobManager(project: Project?): JobManager = NifiJobManager(this, project!!.id)
 
-    override fun importProject(description: String, target: String) = restTemplate.process(
+    override fun importProject(description: String, target: String) = restTemplate.execute(
             request = requester.post(
                     url = "$url/process-groups/$target/process-groups",
                     body = prepareForImport(description)
@@ -43,9 +44,7 @@ class NifiEnvironmentManager(val restTemplate: RestTemplate, private val propert
     )
 
     override fun exportProject(project: Project) = restTemplate.process(
-            request = requester.get<String>("$url/process-groups/${project.id}"),
-            verify = { it != null },
-            transform = { it!! }
+            request = requester.get<String>("$url/process-groups/${project.id}")
     )
 
 

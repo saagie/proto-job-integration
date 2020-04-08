@@ -1,11 +1,17 @@
 package io.saagie.poc.infra.right.common
 
+import com.google.gson.Gson
 import org.springframework.http.HttpStatus
 import org.springframework.http.RequestEntity
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.server.ResponseStatusException
 import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
+import java.text.SimpleDateFormat
 import java.util.*
+import javax.crypto.Mac
+import javax.crypto.spec.SecretKeySpec
 
 /**
  * Encode a given text into a Base64 String
@@ -14,10 +20,15 @@ fun encode64(txt: String) = String(
         Base64.getEncoder().encode(txt.toByteArray())
 )
 
+fun List<String>.concat(separator: String = "") = this.fold("") { acc, s -> "$acc$s$separator"}.removeSuffix(separator)
+
+fun <T> Class<T>.fromJSON(json: String): T = Gson().fromJson(json, this)
+fun <T> T.toJSON(): String = Gson().toJson(this)
+
 /**
  * Transforms a sentence into an URL-ready String.
  */
-fun String.correctURL() = this.replace(" ", "%20")
+fun String.correctURL(): String = URLEncoder.encode(this, "UTF-8")
 
 
 /**
@@ -37,8 +48,8 @@ fun <T> backtrackSearch(initial: T, operation: (T) -> Set<T>): Set<T> =
 fun <T, R> RestTemplate.process(
         request: RequestEntity<T>,
         returnType: Class<T>,
-        transform: (T?) -> R,
-        verify: (T?) -> Boolean = { true }
+        verify: (T) -> Boolean = { true },
+        transform: (T) -> R
 ) : R {
     // Processing request
     val response = this.exchange(request, returnType)
@@ -47,23 +58,49 @@ fun <T, R> RestTemplate.process(
     if (!response.statusCode.is2xxSuccessful) {
         throw ResponseStatusException(response.statusCode)
     }
-    if (!verify(response.body)) {
+    if (response.body == null || !verify(response.body!!)) {
         throw ResponseStatusException(HttpStatus.NO_CONTENT)
     }
 
     // Creating expected result
-    return transform(response.body)
+    return transform(response.body!!)
 }
 
 inline fun <reified T, R> RestTemplate.process(
         request: RequestEntity<T>,
-        noinline transform: (T?) -> R,
-        noinline verify: (T?) -> Boolean = { true }
-) = this.process(request, T::class.java, transform, verify)
+        noinline verify: (T) -> Boolean = { true },
+        noinline transform: (T) -> R
+) = this.process(request, T::class.java, verify, transform)
+
+inline fun <reified T> RestTemplate.process(
+        request: RequestEntity<T>,
+        noinline verify: (T) -> Boolean = { true }
+) = this.process(request, verify) { it }
 
 /**
  * Process the incoming request without any transformation on the response's body.
  * (Pretty useful for POST, PUT, DELETE methods...)
  */
-inline fun <reified T> RestTemplate.process(request: RequestEntity<T>, noinline verify: (T?) -> Boolean = { true })
-        = this.process(request, {}, verify)
+inline fun <reified T> RestTemplate.execute(request: RequestEntity<T>, noinline verify: (T) -> Boolean = { true })
+        = this.process(request, verify) {}
+
+/**
+ * Converts a String or ByteArray into an hexadecimal character string.
+ */
+fun ByteArray.toHexa() = this.toTypedArray().fold(Formatter()) { formatter, byte ->  formatter.format("%02x", byte) }.toString()
+
+/**
+ * Encode a given String using a UTF-8 charset.
+ */
+fun String.getBytes() = this.toByteArray(StandardCharsets.UTF_8)
+
+
+fun String.hash(algorithm: String = "SHA-256") = MessageDigest.getInstance(algorithm).digest(this.getBytes()).toHexa()
+fun String.sign(key: ByteArray, algorithm: String = "HmacSHA256"): ByteArray {
+    val mac = Mac.getInstance(algorithm)
+    mac.init(SecretKeySpec(key, algorithm))
+    return mac.doFinal(this.getBytes())
+}
+
+fun Date.toSimpleFormat(): String = SimpleDateFormat("yyyyMMdd").format(this)
+fun Date.toFullFormat(): String = SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'").format(this)

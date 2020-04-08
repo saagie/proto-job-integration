@@ -5,6 +5,7 @@ import io.saagie.poc.domain.Job
 import io.saagie.poc.domain.JobManager
 import io.saagie.poc.domain.JobStatus
 import io.saagie.poc.infra.right.common.process
+import io.saagie.poc.infra.right.common.execute
 
 class DSXJobManager(private val env: DSXEnvironmentManager, private val project: String) : JobManager {
     // METHODS
@@ -12,28 +13,27 @@ class DSXJobManager(private val env: DSXEnvironmentManager, private val project:
 
     @Suppress("UNCHECKED_CAST")
     override fun getAll() = env.restTemplate.process(
-            request = env.requester.get<Array<String>>("${env.url}/api/v2/filemgmt/view/$project"),
-            verify = { !(it?.isEmpty() ?: true) },
+            request = env.requester.get("${env.url}/api/v2/filemgmt/view/$project"),
+            verify = Array<String>::isNotEmpty,
             transform = {
-                it!!.filter { it.reversed().startsWith(".jar".reversed()) }.map(::toJob)
+                it.filter { it.reversed().startsWith(".jar".reversed()) }.map(::toJob)
             }
     )
 
     @Suppress("UNCHECKED_CAST")
     override fun getStatus(job: Job) = env.restTemplate.process(
             request = env.requester.get<StatusDTO>("${env.url}/api/v1/spark/status?jobId=${job.id}"),
-            verify = { it != null },
-            transform = { toStatus(it!!.status) }
+            transform = { toStatus(it.status) }
     )
 
-    override fun start(job: Job) = env.restTemplate.process(
+    override fun start(job: Job) = env.restTemplate.execute(
             request = env.requester.post(
                     url = "${env.url}/api/v1/spark/submit",
                     body = StartDTO(job.id)
             )
     )
 
-    override fun stop(job: Job) = env.restTemplate.process(
+    override fun stop(job: Job) = env.restTemplate.execute(
             request = env.requester.post(
                     url = "${env.url}/api/v1/spark/cancel?jobId=${job.id}"
             )
